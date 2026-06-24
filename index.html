@@ -10,7 +10,6 @@
     <meta name="apple-mobile-web-app-title" content="Readlite">
     <meta name="mobile-web-app-capable" content="yes">
     
-    <!-- 网站 Logo (Favicon) -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%230084ff%22 rx=%2220%22/><text y=%2250%22 x=%2250%22 font-size=%2250%22 fill=%22%23ffffff%22 text-anchor=%22middle%22 dominant-baseline=%22central%22>📖</text></svg>">
     <link rel="manifest" href='data:application/manifest+json,{"name":"Readlite","short_name":"Readlite","start_url":".","display":"standalone","background_color":"#f8fafd","theme_color":"#0084ff","icons":[{"src":"data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%230084ff%22 rx=%2220%22/><text y=%2250%22 x=%2250%22 font-size=%2250%22 fill=%22%23ffffff%22 text-anchor=%22middle%22 dominant-baseline=%22central%22>📖</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}'>
 
@@ -161,12 +160,9 @@
         .reader-header { height: 60px; border-bottom: 1px solid rgba(128,128,128,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 8px; }
         .reader-header-title { font-size: 15px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
         .reader-viewport { flex: 1; overflow-y: auto; padding: 32px 24px; max-width: 800px; width: 100%; margin: 0 auto; scroll-behavior: smooth; transition: font-size 0.2s, line-height 0.2s, font-family 0.2s; position: relative;}
+        #epub-viewer { width: 100%; height: 100%; overflow: hidden;}
         .txt-content { white-space: pre-wrap; word-break: break-all; padding-bottom: 200px; }
-        #epub-viewer { width: 100%; height: 100%; }
-        
-        /* 针对 PDF 优化的展示容器 */
         #pdf-viewer { display: none; height: 100%; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px;}
-        
         .reader-footer { height: 40px; border-top: 1px solid rgba(128,128,128,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-size: 11px; opacity: 0.6; }
 
         /* Settings Bottom Sheet */
@@ -198,7 +194,7 @@
             <div class="drawer-title">
                 <span class="material-symbols-outlined" style="color: var(--md-primary); font-size: 28px; margin-right: 8px;">menu_book</span> Readlite
             </div>
-            <div class="drawer-subtitle" data-i18n="app_desc">v0.2.8 · 完美版</div>
+            <div class="drawer-subtitle" data-i18n="app_desc">v0.2.9 · 终极版</div>
         </div>
         <div class="drawer-content">
             <button class="menu-item" onclick="toggleDarkMode()">
@@ -230,27 +226,23 @@
         <div class="modal-header" data-i18n="menu_changelog">更新日志</div>
         <div class="modal-body">
             <div class="changelog-item">
-                <div class="changelog-ver">v0.2.8 (最新版)</div>
-                - 格式扩展：新增对 PDF 文件的导入，并提供专属的系统阅读器唤起方案，解决移动端内核限制。<br>
-                - Bug修复：彻底解决 EPUB 首次加载卡顿，实现即点即开。<br>
-                - 强制排版：注入最高权重强制字体引擎，完美覆盖部分 EPUB 内部死板的排版，轻松切换宋体。<br>
-                - 品牌补全：加入网站专属 Logo 图标 (Favicon)。
+                <div class="changelog-ver">v0.2.9 (终极无缝修复版)</div>
+                - 【无缝重构】强启 EPUB 的 continuous 流式引擎，真正实现跨章节上下无缝连贯滑动。<br>
+                - 【沙盒穿透】采用强行注入 style 的钩子技术，打破手机浏览器隔离。<br>
+                - 【友好提示】新增移动端浏览器不支持宋体时的友好拦截提示。<br>
+                - 【进度防卡死】双重骨架测算，彻底消灭 EPUB 进度条卡在 0% 的顽固现象。
             </div>
             <div class="changelog-item">
-                <div class="changelog-ver">v0.2.x 核心更新</div>
-                - 智能解析 EPUB 原生书籍封面与作者信息。<br>
-                - 彻底修复因变量名冲突导致无法导入电子书的漏洞。<br>
-                - 重构为经典「图文+双按钮」阅读打分详情页。<br>
-                - 智能解析 TXT 生成目录 (TOC)。
+                <div class="changelog-ver">v0.2.7 - v0.2.8</div>
+                - 新增 PDF 文件支持（原生唤起）与网站专属 Logo。
             </div>
             <div class="changelog-item">
-                <div class="changelog-ver">v0.1.x 详细日志</div>
-                - v0.1.5: 加入中英文双语系统与夜间模式快捷切换。<br>
-                - v0.1.4: 新增「在读」分类与 1-5 星个人评分系统。<br>
-                - v0.1.3: 加入 Sepia 护眼阅读主题，支持无级字号调节。<br>
-                - v0.1.2: 顶部引入全局书籍搜索栏与设置侧边栏。<br>
-                - v0.1.1: 书架支持网格/列表视图切换，调色板自定义封面。<br>
-                - v0.1.0: 初版发布，支持本地极速解析 TXT 与阅读进度记忆。
+                <div class="changelog-ver">v0.2.0 - v0.2.6</div>
+                - 自动提取原书封面、沉浸式 Aura 详情页、笔记星级与无极排版。
+            </div>
+            <div class="changelog-item">
+                <div class="changelog-ver">v0.1.x 极速基石</div>
+                - TXT/EPUB 解析、护眼双语系统、网格书架与记忆存储。
             </div>
         </div>
         <div class="modal-footer">
@@ -290,7 +282,6 @@
         <button class="nav-item" id="nav-favorites" onclick="switchTab('favorites')"><span class="material-symbols-outlined icon">star</span><span class="label" data-i18n="nav_fav">收藏</span></button>
     </nav>
     <button class="fab" onclick="document.getElementById('file-input').click()"><span class="material-symbols-outlined" style="font-size: 28px;">add</span></button>
-    <!-- 支持导入的格式列表 -->
     <input type="file" id="file-input" accept=".txt,.epub,.pdf" onchange="handleFileImport(event)">
 
     <!-- ================= Book Detail Screen ================= -->
@@ -362,7 +353,6 @@
         <div class="reader-viewport" id="viewport-wrapper">
             <div id="txt-viewer" class="txt-content" style="display: none;"></div>
             <div id="epub-viewer" style="display: none;"></div>
-            <!-- 针对 PDF 的引导唤起容器 -->
             <div id="pdf-viewer"></div>
         </div>
         <div class="reader-footer">
@@ -413,7 +403,7 @@
     <script>
         const translations = {
             "zh": {
-                "app_desc": "v0.2.8 · 完美版", "menu_dark_mode": "夜间模式", "menu_light_mode": "日间模式", "menu_lang": "Switch to English",
+                "app_desc": "v0.2.9 · 终极版", "menu_dark_mode": "夜间模式", "menu_light_mode": "日间模式", "menu_lang": "Switch to English",
                 "menu_changelog": "更新日志", "menu_clear": "清理缓存", "btn_close": "关闭", "search_ph": "搜索书名...",
                 "empty_all": "书架空空如也，点击加号导入", "empty_reading": "还没有正在阅读的书籍", "empty_fav": "还没有收藏任何书籍",
                 "nav_all": "全部", "nav_reading": "在读", "nav_fav": "收藏", "detail_author": "本地文件", "detail_prog": "阅读进度",
@@ -421,10 +411,11 @@
                 "read_cont": "继续阅读", "read_again": "重新阅读", "sheet_title": "排版与阅读设置", "sheet_font": "字号",
                 "sheet_lh": "间距", "sheet_ff": "字体", "sheet_bg": "背景", "toast_import": "导入成功", "toast_delete": "已删除",
                 "toast_clear": "缓存已清理", "confirm_del_book": "确定移出书架吗？", "confirm_clear": "警告：将删除所有书籍和进度！",
-                "reader_toc": "目录 (TOC)", "prompt_note": "请输入笔记内容 (留空仅添加书签)：", "toast_note_saved": "已保存！"
+                "reader_toc": "目录 (TOC)", "prompt_note": "请输入笔记内容 (留空仅添加书签)：", "toast_note_saved": "已保存！",
+                "toast_font_limitation": "提示：受移动端浏览器限制，部分 EPUB 可能无法切换为宋体"
             },
             "en": {
-                "app_desc": "v0.2.8 · Perfect Version", "menu_dark_mode": "Dark Mode", "menu_light_mode": "Light Mode", "menu_lang": "切换为中文",
+                "app_desc": "v0.2.9 · Ultimate", "menu_dark_mode": "Dark Mode", "menu_light_mode": "Light Mode", "menu_lang": "切换为中文",
                 "menu_changelog": "Changelog", "menu_clear": "Clear Cache", "btn_close": "Close", "search_ph": "Search books...",
                 "empty_all": "Bookshelf is empty. Tap + to import.", "empty_reading": "No books in progress.", "empty_fav": "No favorite books.",
                 "nav_all": "All", "nav_reading": "Reading", "nav_fav": "Favorites", "detail_author": "Local File", "detail_prog": "Progress",
@@ -432,7 +423,8 @@
                 "read_cont": "Continue", "read_again": "Read Again", "sheet_title": "Typography Settings", "sheet_font": "Size",
                 "sheet_lh": "Spacing", "sheet_ff": "Font", "sheet_bg": "Theme", "toast_import": "Imported", "toast_delete": "Deleted",
                 "toast_clear": "Cache cleared", "confirm_del_book": "Remove book from shelf?", "confirm_clear": "Delete ALL books and data?",
-                "reader_toc": "Table of Contents", "prompt_note": "Enter note (blank for bookmark):", "toast_note_saved": "Saved!"
+                "reader_toc": "Table of Contents", "prompt_note": "Enter note (blank for bookmark):", "toast_note_saved": "Saved!",
+                "toast_font_limitation": "Tip: Due to mobile browser limits, some EPUBs may not support Serif font."
             }
         };
 
@@ -462,7 +454,7 @@
         function openDrawer(id) { document.getElementById(id).classList.add('active'); document.getElementById('backdrop').classList.add('active'); }
         function openModal(id) { document.getElementById(id).classList.add('active'); document.getElementById('backdrop').classList.add('active'); }
         function closeOverlays() { document.querySelectorAll('.drawer, .modal, .bottom-sheet').forEach(el => el.classList.remove('active')); document.getElementById('backdrop').classList.remove('active'); }
-        function showToast(msg) { const t_el = document.getElementById('toast'); t_el.innerText = msg; t_el.classList.add('show'); setTimeout(() => t_el.classList.remove('show'), 2000); }
+        function showToast(msg) { const t_el = document.getElementById('toast'); t_el.innerText = msg; t_el.classList.add('show'); setTimeout(() => t_el.classList.remove('show'), 3000); }
         function clearCache() { if(confirm(t('confirm_clear'))) { db.transaction(['books'], 'readwrite').objectStore('books').clear().onsuccess = () => { showToast(t('toast_clear')); closeOverlays(); loadBookshelf(); }; } }
 
         function toggleDarkMode() { setTheme(currentTheme === 'dark' ? 'light' : 'dark'); }
@@ -475,7 +467,25 @@
         function updateSidebarThemeText() { const d = currentTheme === 'dark'; document.getElementById('sidebar-dark-icon').innerText = d ? 'light_mode' : 'dark_mode'; document.querySelector('[data-i18n="menu_dark_mode"]').innerText = t(d ? 'menu_light_mode' : 'menu_dark_mode'); }
         function adjustFontSize(delta) { currentFontSize = Math.max(12, Math.min(36, currentFontSize + delta)); localStorage.setItem('readlite_fontsize', currentFontSize); updateTypographyUI(); applyTypographyToReader(); }
         function setLineHeight(val) { currentLineHeight = val; localStorage.setItem('readlite_lh', val); updateTypographyUI(); applyTypographyToReader(); }
-        function setFontFamily(val) { currentFontFamily = val; localStorage.setItem('readlite_ff', val); updateTypographyUI(); applyTypographyToReader(); }
+        
+        function setFontFamily(val) { 
+            currentFontFamily = val; 
+            localStorage.setItem('readlite_ff', val); 
+            updateTypographyUI(); 
+            applyTypographyToReader(); 
+
+            // 移动端字体限制提示
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (val === 'serif' && isMobile && activeBookId) {
+                db.transaction(['books'], 'readonly').objectStore('books').get(activeBookId).onsuccess = (e) => {
+                    const b = e.target.result;
+                    if (b && b.type === 'epub') {
+                        showToast(t('toast_font_limitation'));
+                    }
+                };
+            }
+        }
+
         function updateTypographyUI() {
             document.getElementById('font-size-display').innerText = currentFontSize;
             document.querySelectorAll('#lh-1, #lh-2, #lh-3').forEach(el => el.classList.remove('active'));
@@ -493,21 +503,23 @@
             if(epubRendition) {
                 const bg = getComputedStyle(document.body).getPropertyValue('--reader-bg').trim();
                 const fg = getComputedStyle(document.body).getPropertyValue('--reader-color').trim();
-                const ff = currentFontFamily === 'serif' ? "'Noto Serif SC', serif !important" : "'Noto Sans SC', sans-serif !important";
+                const ff = currentFontFamily === 'serif' ? "'Noto Serif SC', serif" : "'Noto Sans SC', sans-serif";
                 
-                // 彻底覆盖 EPUB 内置字体引擎，使用极强权重的 CSS 规则打透标签限制
-                epubRendition.themes.register("customForceTheme", { 
-                    "body": { "background": bg + " !important", "color": fg + " !important" },
-                    "p, div, span, h1, h2, h3, h4, h5, h6, li, blockquote, a": { 
-                        "font-family": ff, 
-                        "line-height": currentLineHeight + " !important",
-                        "color": fg + " !important"
+                epubRendition.getContents().forEach(content => {
+                    let doc = content.document;
+                    if(!doc) return;
+                    let forceStyle = doc.getElementById('readlite-force-style');
+                    if (!forceStyle) {
+                        forceStyle = doc.createElement('style');
+                        forceStyle.id = 'readlite-force-style';
+                        doc.head.appendChild(forceStyle);
                     }
+                    forceStyle.innerHTML = `
+                        html, body { background-color: ${bg} !important; color: ${fg} !important; font-family: ${ff} !important; font-size: ${currentFontSize}px !important; line-height: ${currentLineHeight} !important; }
+                        * { font-family: ${ff} !important; line-height: ${currentLineHeight} !important; color: ${fg} !important; }
+                        p, div, span { font-family: inherit !important; }
+                    `;
                 });
-                epubRendition.themes.select("customForceTheme"); 
-                // 另外调用官方的 font 方法加一层双重保险
-                epubRendition.themes.font(currentFontFamily === 'serif' ? 'Noto Serif SC, serif' : 'Noto Sans SC, sans-serif');
-                epubRendition.themes.fontSize(currentFontSize + "px");
             }
         }
 
@@ -640,14 +652,7 @@
         function triggerColorPickerForDetail() { if(currentDetailBookId) document.getElementById('color-picker').click(); }
         function handleColorChange(ev) {
             if(!currentDetailBookId) return; const c = ev.target.value, s = db.transaction(['books'], 'readwrite').objectStore('books');
-            s.get(currentDetailBookId).onsuccess = (e) => { 
-                const b = e.target.result; b.color = c; 
-                s.put(b).onsuccess = () => { 
-                    document.getElementById('detail-cover').style.borderLeftColor = c; 
-                    if(document.getElementById('detail-cover-icon')) document.getElementById('detail-cover-icon').style.color = c; 
-                    document.getElementById('detail-screen').style.backgroundImage = `linear-gradient(to bottom, ${hexToRgba(c, 0.15)} 0%, var(--md-background) 60%)`; 
-                }; 
-            };
+            s.get(currentDetailBookId).onsuccess = (e) => { const b = e.target.result; b.color = c; s.put(b).onsuccess = () => { document.getElementById('detail-cover').style.borderLeftColor = c; document.getElementById('detail-cover-icon').style.color = c; document.getElementById('detail-screen').style.backgroundImage = `linear-gradient(to bottom, ${hexToRgba(c, 0.15)} 0%, var(--md-background) 60%)`; }; };
         }
         function deleteCurrentDetailBook() { if(confirm(t('confirm_del_book'))) { db.transaction(['books'], 'readwrite').objectStore('books').delete(currentDetailBookId).onsuccess = () => { closeBookDetail(); showToast(t('toast_delete')); }; } }
         function toggleFavFromDetail() { if(!currentDetailBookId) return; const s = db.transaction(['books'], 'readwrite').objectStore('books'); s.get(currentDetailBookId).onsuccess = (e) => { const b = e.target.result; b.isFavorite = !b.isFavorite; s.put(b).onsuccess = () => { updateDetailFavIcon(b.isFavorite); }; }; }
@@ -693,8 +698,7 @@
         function showTxt(b) {
             document.getElementById('epub-viewer').style.display = 'none'; document.getElementById('pdf-viewer').style.display = 'none';
             const v = document.getElementById('txt-viewer'), w = document.getElementById('viewport-wrapper');
-            w.style.padding = '32px 24px';
-            v.style.display = 'block'; v.innerText = b.content;
+            w.style.padding = '32px 24px'; v.style.display = 'block'; v.innerText = b.content;
             setTimeout(() => { w.scrollTop = b.progressDetail || 0; updateProg(calcTxtProg()); }, 50);
             w.onscroll = () => { const p = calcTxtProg(); updateProg(p); saveProg(w.scrollTop, p); };
         }
@@ -703,37 +707,73 @@
         function showPdf(b) {
             document.getElementById('txt-viewer').style.display = 'none'; document.getElementById('epub-viewer').style.display = 'none';
             const v = document.getElementById('pdf-viewer'), w = document.getElementById('viewport-wrapper');
-            w.style.padding = '0'; // PDF 无需排版间距
-            v.style.display = 'flex';
-            
-            // 构造优雅的唤起系统阅读器界面
-            const blob = new Blob([b.content], {type: 'application/pdf'});
-            const url = URL.createObjectURL(blob);
-            
+            w.style.padding = '0'; v.style.display = 'flex';
+            const blob = new Blob([b.content], {type: 'application/pdf'}); const url = URL.createObjectURL(blob);
             v.innerHTML = `
                 <span class="material-symbols-outlined" style="font-size: 64px; color: var(--md-primary); margin-bottom: 16px;">picture_as_pdf</span>
                 <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px; color: var(--md-on-surface);">${b.title}</div>
-                <div style="font-size: 13px; color: var(--md-on-surface-variant); margin-bottom: 32px; max-width: 80%; line-height: 1.5;">由于移动端浏览器内核安全限制，为保证最佳的渲染和滑动体验，请调用系统原生应用打开此 PDF 文档。</div>
+                <div style="font-size: 13px; color: var(--md-on-surface-variant); margin-bottom: 32px; max-width: 80%; line-height: 1.5;">由于移动端浏览器限制，请调用系统原生应用打开 PDF 文档。</div>
                 <a href="${url}" download="${b.title}.pdf" style="padding: 14px 36px; background-color: var(--md-primary); color: white; border-radius: 28px; text-decoration: none; font-size: 15px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,132,255,0.3);">调用系统阅读器打开</a>
             `;
-            updateProg(1); saveProg(null, 1); // 默认标为已读
+            updateProg(1); saveProg(null, 1);
         }
 
         function showEpub(b) {
             document.getElementById('txt-viewer').style.display = 'none'; document.getElementById('pdf-viewer').style.display = 'none';
             const v = document.getElementById('epub-viewer'), w = document.getElementById('viewport-wrapper');
-            w.style.padding = '32px 24px';
+            
+            w.style.padding = '0'; 
             v.style.display = 'block'; v.innerHTML = '';
             
             epubBookInstance = ePub(b.content); 
-            epubRendition = epubBookInstance.renderTo("epub-viewer", { width: "100%", height: "100%", flow: "scrolled", direction: "vertical" });
-            applyTypographyToReader(); 
             
-            // 完美解决初次加载卡顿白屏：防止传入空进度
+            epubRendition = epubBookInstance.renderTo("epub-viewer", { 
+                width: "100%", 
+                height: "100%", 
+                flow: "scrolled", 
+                manager: "continuous" 
+            });
+            
+            epubRendition.hooks.content.register(function(contents) {
+                const bg = getComputedStyle(document.body).getPropertyValue('--reader-bg').trim();
+                const fg = getComputedStyle(document.body).getPropertyValue('--reader-color').trim();
+                const ff = currentFontFamily === 'serif' ? "'Noto Serif SC', serif" : "'Noto Sans SC', sans-serif";
+                
+                let doc = contents.document;
+                if(!doc) return;
+                let forceStyle = doc.getElementById('readlite-force-style');
+                if (!forceStyle) {
+                    forceStyle = doc.createElement('style');
+                    forceStyle.id = 'readlite-force-style';
+                    doc.head.appendChild(forceStyle);
+                }
+                forceStyle.innerHTML = `
+                    html, body { padding: 0 12px !important; background-color: ${bg} !important; color: ${fg} !important; font-family: ${ff} !important; font-size: ${currentFontSize}px !important; line-height: ${currentLineHeight} !important; }
+                    * { font-family: ${ff} !important; line-height: ${currentLineHeight} !important; color: ${fg} !important; background-color: transparent !important;}
+                    p, div, span { font-family: inherit !important; }
+                `;
+            });
+
+            applyTypographyToReader(); 
             epubRendition.display(b.progressDetail || undefined);
+
+            // 如果是在手机上打开，并且默认已经是宋体，弹窗提示
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (currentFontFamily === 'serif' && isMobile) {
+                setTimeout(() => showToast(t('toast_font_limitation')), 1000);
+            }
             
             epubBookInstance.loaded.navigation.then(nav => { currentToc = []; nav.forEach(i => currentToc.push({ title: i.label, detail: i.href })); renderTOC(); });
-            epubRendition.on('relocated', (loc) => { const p = loc.start.percentage || 0; updateProg(p); saveProg(loc.start.cfi, p); });
+            
+            epubRendition.on('relocated', (loc) => { 
+                let p = 0;
+                if (epubBookInstance.locations && epubBookInstance.locations.total > 0) {
+                    p = epubBookInstance.locations.percentageFromCfi(loc.start.cfi);
+                } else if (loc.start && loc.start.index !== undefined && epubBookInstance.spine) {
+                    p = loc.start.index / epubBookInstance.spine.length;
+                }
+                updateProg(p); saveProg(loc.start.cfi, p); 
+            });
         }
 
         function updateProg(v) { document.getElementById('reader-progress-label').innerText = `${(Math.min(100, Math.max(0, v*100))).toFixed(1)}%`; }
