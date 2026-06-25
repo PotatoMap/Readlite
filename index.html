@@ -10,6 +10,7 @@
     <meta name="apple-mobile-web-app-title" content="Readlite">
     <meta name="mobile-web-app-capable" content="yes">
     
+    <!-- 纯静态原生 Logo 与桌面书签图标 -->
     <link rel="manifest" href='data:application/manifest+json,{"name":"Readlite","short_name":"Readlite","start_url":".","display":"standalone","background_color":"#f8fafd","theme_color":"#0084ff","icons":[{"src":"data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%230084ff%22 rx=%2220%22/><text y=%2250%22 x=%2250%22 font-size=%2250%22 fill=%22%23ffffff%22 text-anchor=%22middle%22 dominant-baseline=%22central%22>📖</text></svg>","sizes":"512x512","type":"image/svg+xml","purpose":"any maskable"}]}'>
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%230084ff%22 rx=%2220%22/><text y=%2250%22 x=%2250%22 font-size=%2250%22 fill=%22%23ffffff%22 text-anchor=%22middle%22 dominant-baseline=%22central%22>📖</text></svg>">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%230084ff%22 rx=%2220%22/><text y=%2250%22 x=%2250%22 font-size=%2250%22 fill=%22%23ffffff%22 text-anchor=%22middle%22 dominant-baseline=%22central%22>📖</text></svg>">
@@ -22,115 +23,202 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
     <style>
-        /* 全局隐藏滚动条 */
+        /* 彻底隐藏全局滚动条，保持物理滚动可用 */
         ::-webkit-scrollbar { display: none; width: 0; height: 0; }
-        * { scrollbar-width: none; -ms-overflow-style: none; }
+        * { scrollbar-width: none; -ms-overflow-style: none; box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
+        /* ================= 核心主题色彩层 ================= */
         :root {
             --md-primary: #0084ff; --md-on-primary: #ffffff; --md-background: #f7f9fa;
             --md-surface: #ffffff; --md-surface-container: #f0f4f9; --md-surface-container-high: #e2e8f0;
             --md-surface-variant: #e1e3e1; --md-on-surface: #1f1f1f; --md-on-surface-variant: #7a7a7a;
-            --md-outline: #dadce0; --md-accent: #e8f0fe; --md-on-accent: #1967d2;
-            --reader-bg: #faf9f7; --reader-color: #2b2b2b;
-            --dynamic-rgb: 0, 132, 255; 
-            --md-primary-rgb: 0, 132, 255;
+            --md-outline: #dadce0; --md-primary-rgb: 0, 132, 255; --md-surface-rgb: 255, 255, 255;
+            --reader-bg: #faf9f7; --reader-color: #2b2b2b; --dynamic-rgb: 0, 132, 255; 
             
-            /* 拟物化参数 */
+            /* 拟物风格基础参数 (Light) */
             --sk-card-top: #fdfdfd; --sk-card-bottom: #e0e0e0; --sk-border: #c0c0c0;
             --sk-inset: rgba(255,255,255,0.8); --sk-shadow: rgba(0,0,0,0.2);
-            --sk-btn-top: #f0f0f0; --sk-btn-bottom: #dcdcdc; --sk-btn-text: #333;
+            --sk-btn-top: #f0f0f0; --sk-btn-bottom: #dcdcdc; --sk-btn-text: #333; --sk-text-shadow: 0 1px 0 rgba(255,255,255,0.6);
             --sk-search-bg: #e5e5e5; --sk-search-inset: rgba(0,0,0,0.15);
         }
         body[data-theme="dark"] { 
             --md-primary: #66b2ff; --md-on-primary: #003062; --md-background: #000000; 
             --md-surface: #121212; --md-surface-container: #1e1e1e; --md-surface-container-high: #2b2b2b; 
             --md-surface-variant: #444746; --md-on-surface: #e3e3e3; --md-on-surface-variant: #c4c7c5; 
-            --md-outline: #555; --reader-bg: #000000; --reader-color: #d1d1d1; --md-primary-rgb: 102, 178, 255; 
+            --md-outline: #555; --md-primary-rgb: 102, 178, 255; --md-surface-rgb: 18, 18, 18;
+            --reader-bg: #000000; --reader-color: #d1d1d1;
             
-            /* 深色拟物化参数 */
+            /* 拟物风格基础参数 (Dark) */
             --sk-card-top: #2b2b2b; --sk-card-bottom: #1e1e1e; --sk-border: #111;
             --sk-inset: rgba(255,255,255,0.05); --sk-shadow: rgba(0,0,0,0.8);
-            --sk-btn-top: #333; --sk-btn-bottom: #222; --sk-btn-text: #e3e3e3;
+            --sk-btn-top: #333; --sk-btn-bottom: #222; --sk-btn-text: #e3e3e3; --sk-text-shadow: 0 -1px 0 rgba(0,0,0,0.6);
             --sk-search-bg: #111; --sk-search-inset: rgba(0,0,0,0.5);
         }
         body[data-theme="sepia"] { 
             --md-background: #f4ecd8; --md-surface: #fdf6e3; --md-surface-container: #e9e1c9; 
             --md-surface-container-high: #dfd7be; --md-on-surface: #5b4636; --md-on-surface-variant: #7a614a; 
-            --md-outline: #a38d7a; --reader-bg: #fdf6e3; --reader-color: #4a3424; 
+            --md-outline: #a38d7a; --md-surface-rgb: 253, 246, 227; --reader-bg: #fdf6e3; --reader-color: #4a3424; 
         }
         body[data-theme="eink"] { 
             --md-primary: #000000; --md-on-primary: #ffffff; --md-background: #ffffff; 
             --md-surface: #ffffff; --md-surface-container: #f0f0f0; --md-surface-container-high: #e0e0e0; 
             --md-surface-variant: #dddddd; --md-on-surface: #000000; --md-on-surface-variant: #333333; 
-            --md-outline: #000000; --reader-bg: #ffffff; --reader-color: #000000; filter: grayscale(100%) contrast(1.1); --md-primary-rgb: 0, 0, 0;
+            --md-outline: #000000; --md-surface-rgb: 255, 255, 255; --md-primary-rgb: 0, 0, 0; --reader-bg: #ffffff; --reader-color: #000000; 
+            filter: grayscale(100%) contrast(1.1); 
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Roboto', 'Noto Sans SC', sans-serif; background-color: var(--md-background); color: var(--md-on-surface); height: 100vh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; transition: background-color 0.3s, color 0.3s; }
-        #app-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        /* ================= 材质物理引擎 (Material Engine) ================= */
         
+        /* 简约态 (Minimalist) - 轻、透、浮层感 */
+        body[data-style="minimal"] {
+            --ui-radius-card: 16px;
+            --ui-radius-btn: 16px;
+            --ui-card-bg: var(--md-surface);
+            --ui-card-border: 1px solid rgba(128,128,128,0.1);
+            --ui-card-shadow: 0 8px 24px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.02);
+            --ui-highlight-opacity: 0;
+            
+            --ui-btn-primary-bg: var(--md-primary);
+            --ui-btn-primary-border: 1px solid transparent;
+            --ui-btn-primary-shadow: 0 4px 16px rgba(var(--md-primary-rgb), 0.3);
+            --ui-btn-primary-text-shadow: none;
+            --ui-btn-primary-color: #ffffff;
+
+            --ui-btn-secondary-bg: var(--md-surface-container);
+            --ui-btn-secondary-border: 1px solid transparent;
+            --ui-btn-secondary-shadow: none;
+            --ui-btn-secondary-text-shadow: none;
+            --ui-btn-secondary-color: var(--md-on-surface);
+            
+            --ui-search-bg: var(--md-surface-container);
+            --ui-search-shadow: none;
+            --ui-search-border: 1px solid transparent;
+            
+            --ui-panel-bg: rgba(var(--md-surface-rgb), 0.85);
+            --ui-panel-filter: blur(20px);
+            --ui-panel-shadow: 0 -8px 32px rgba(0,0,0,0.08);
+            --ui-panel-border: 1px solid rgba(128,128,128,0.05);
+            
+            --ui-active-transform: scale(0.96);
+            --ui-active-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* 拟物态 (Skeuomorphic) - 重、实体、压感 */
+        body[data-style="skeuomorph"] {
+            --ui-radius-card: 12px;
+            --ui-radius-btn: 24px;
+            --ui-card-bg: linear-gradient(180deg, var(--sk-card-top) 0%, var(--sk-card-bottom) 100%);
+            --ui-card-border: 1px solid var(--sk-border);
+            --ui-card-shadow: inset 0 1px 1px var(--sk-inset), 0 4px 6px var(--sk-shadow), 0 20px 40px -10px rgba(var(--book-rgb, 0,0,0), 0.4);
+            --ui-highlight-opacity: 1;
+            
+            --ui-btn-primary-bg: linear-gradient(180deg, #0096ff 0%, #0070e0 100%);
+            --ui-btn-primary-border: 1px solid #0050a0;
+            --ui-btn-primary-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 8px rgba(0,0,0,0.3);
+            --ui-btn-primary-text-shadow: 0 -1px 0 rgba(0,0,0,0.3);
+            --ui-btn-primary-color: #ffffff;
+
+            --ui-btn-secondary-bg: linear-gradient(180deg, var(--sk-btn-top) 0%, var(--sk-btn-bottom) 100%);
+            --ui-btn-secondary-border: 1px solid var(--sk-border);
+            --ui-btn-secondary-shadow: inset 0 1px 0 var(--sk-inset), 0 2px 4px var(--sk-shadow);
+            --ui-btn-secondary-text-shadow: var(--sk-text-shadow);
+            --ui-btn-secondary-color: var(--sk-btn-text);
+            
+            --ui-search-bg: var(--sk-search-bg);
+            --ui-search-shadow: inset 0 2px 4px var(--sk-search-inset);
+            --ui-search-border: 1px solid var(--sk-border);
+            
+            --ui-panel-bg: var(--md-surface);
+            --ui-panel-filter: none;
+            --ui-panel-shadow: 0 -4px 16px rgba(0,0,0,0.15);
+            --ui-panel-border: 1px solid var(--sk-border);
+            
+            --ui-active-transform: translateY(2px) scale(0.98);
+            --ui-active-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        /* ================= 基础容器 ================= */
+        body { font-family: 'Roboto', 'Noto Sans SC', sans-serif; background-color: var(--md-background); height: 100vh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; transition: background-color 0.4s ease; }
+        #app-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; position: relative; overflow: hidden; }
         .icon-btn { background: none; border: none; color: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); will-change: transform; }
         .icon-btn:active { transform: scale(0.9); }
-
-        .app-bar { flex-shrink: 0; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background-color: var(--md-background); z-index: 10; }
+        .app-bar { flex-shrink: 0; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background-color: var(--md-background); z-index: 10; transition: background-color 0.4s ease;}
         .app-bar-left { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; color: var(--md-on-surface); }
 
-        .search-container { flex-shrink: 0; padding: 8px 20px 16px; background-color: var(--md-background); display: block; transition: opacity 0.15s ease-in-out; }
-        /* 拟物化搜索框 */
-        .search-box { display: flex; align-items: center; background: var(--sk-search-bg); border: 1px solid var(--sk-border); box-shadow: inset 0 2px 4px var(--sk-search-inset); border-radius: 24px; padding: 0 16px; height: 44px; transition: box-shadow 0.2s; }
-        .search-box:focus-within { box-shadow: inset 0 2px 4px var(--sk-search-inset), 0 0 0 2px var(--md-primary); border-color: transparent; }
+        /* ================= 组件渲染层 ================= */
+        
+        /* 搜索框 */
+        .search-container { flex-shrink: 0; padding: 8px 20px 16px; background-color: var(--md-background); display: block; transition: opacity 0.2s ease, background-color 0.4s ease; }
+        .search-box { display: flex; align-items: center; border-radius: 24px; padding: 0 16px; height: 44px; 
+            background: var(--ui-search-bg); border: var(--ui-search-border); box-shadow: var(--ui-search-shadow);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
         .search-box input { flex: 1; border: none; background: none; outline: none; font-size: 15px; color: var(--md-on-surface); padding-left: 12px; }
 
-        .tags-filter-bar { flex-shrink: 0; display: flex; gap: 8px; overflow-x: auto; padding: 8px 20px 16px; scrollbar-width: none; }
+        .tags-filter-bar { flex-shrink: 0; display: flex; gap: 8px; overflow-x: auto; padding: 8px 20px 16px; }
         .tag-chip { flex-shrink: 0; padding: 6px 16px; border-radius: 16px; font-size: 13px; font-weight: 600; background-color: var(--md-surface); border: 1px solid var(--md-outline); color: var(--md-on-surface-variant); cursor: pointer; transition: 0.2s; }
         .tag-chip.active { background-color: var(--md-primary); color: var(--md-on-primary); border-color: var(--md-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
 
-        #main-content-scroll { transition: opacity 0.15s ease-in-out; }
+        #main-content-scroll { transition: opacity 0.2s ease-in-out; }
         .main-content { flex: 1; overflow-y: auto; padding: 0 20px 100px; overscroll-behavior-y: contain; }
-        .bookshelf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 28px 20px; }
+        .bookshelf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 28px 20px; align-items: start;}
         @media (min-width: 600px) { .bookshelf-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); } }
         .bookshelf-grid.list-view { display: flex; flex-direction: column; gap: 16px; }
 
-        /* 拟物化卡片 */
-        .book-card { 
-            background: linear-gradient(180deg, var(--sk-card-top) 0%, var(--sk-card-bottom) 100%); 
-            border-radius: 10px; 
-            border: 1px solid var(--sk-border);
-            display: flex; flex-direction: column; position: relative; cursor: pointer; aspect-ratio: 1 / 1.45; 
-            box-shadow: inset 0 1px 1px var(--sk-inset), 0 4px 6px var(--sk-shadow), 0 1px 2px rgba(0,0,0,0.1); 
-            border-left: 6px solid var(--md-primary); overflow: hidden; 
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease; 
+        /* 卡片重构：无边距、纯封面 */
+        .book-item-wrapper { display: flex; flex-direction: column; gap: 8px; cursor: pointer; }
+        .book-card, .zen-card { 
+            background: var(--ui-card-bg); border-radius: var(--ui-radius-card); border: var(--ui-card-border); box-shadow: var(--ui-card-shadow);
+            display: flex; flex-direction: column; position: relative; overflow: hidden; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
         }
-        .book-card:active { transform: translateY(2px); box-shadow: inset 0 2px 4px var(--sk-shadow); }
-        .list-view .book-card { flex-direction: row; aspect-ratio: auto; height: 100px; border-radius: 6px 10px 10px 6px; border-left: 8px solid var(--md-primary); box-shadow: inset 0 1px 1px var(--sk-inset), 0 4px 6px var(--sk-shadow); }
-        .book-cover-placeholder { flex: 1; background: linear-gradient(135deg, var(--md-surface-container), var(--md-surface-container-high)); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; text-align: center; overflow: hidden;}
-        .list-view .book-cover-placeholder { flex: 0 0 70px; padding: 6px; }
-        .book-cover-placeholder span.icon { font-size: 36px; margin-bottom: 8px; color: var(--book-color, var(--md-primary)); text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .book-info-bottom { padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--sk-border); }
-        .list-view .book-info-bottom { flex: 1; justify-content: center; padding: 12px 16px; gap: 8px; border-top: none; border-left: 1px solid var(--sk-border); }
-        .list-title-display { font-size: 15px; font-weight: 700; display: none; }
-        .list-view .list-title-display { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .progress-bar-container { width: 100%; height: 3px; background-color: var(--md-surface-container-high); border-radius: 2px; box-shadow: inset 0 1px 1px rgba(0,0,0,0.1); }
-        .progress-bar-fill { height: 100%; width: 0%; background-color: var(--book-color, var(--md-primary)); border-radius: 2px; transition: width 0.3s ease;}
+        .book-card { aspect-ratio: 1 / 1.45; border-left: 6px solid var(--md-primary); }
+        .book-card::before, .zen-card::before { content: ''; position: absolute; left: 0; right: 0; top: 0; bottom: 0; border-radius: inherit; box-shadow: inset 0 1px 1px rgba(255,255,255,0.8); pointer-events: none; opacity: var(--ui-highlight-opacity); transition: opacity 0.4s ease; }
+        .book-item-wrapper:active .book-card, .zen-card:active { transform: var(--ui-active-transform); box-shadow: var(--ui-active-shadow); }
+        
+        .book-cover-placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; text-align: center; overflow: hidden; position: relative; z-index: 1;}
+        .book-cover-placeholder span.icon { font-size: 36px; margin-bottom: 8px; color: var(--book-color, var(--md-primary)); text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        /* 外部悬浮书名 */
+        .book-outside-title { font-size: 13px; font-weight: 500; color: var(--md-on-surface); text-align: left; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; padding: 0 4px; }
+
+        /* 列表视图重构 */
+        .list-view .book-item-wrapper { flex-direction: row; gap: 16px; align-items: center; padding: 4px 0;}
+        .list-view .book-card { width: 70px; height: 100px; flex-shrink: 0; aspect-ratio: auto; border-left: 6px solid var(--md-primary); }
+        .list-view .book-cover-placeholder { padding: 4px; }
+        .list-view .book-outside-title { font-size: 16px; font-weight: 600; flex: 1; -webkit-line-clamp: 3;}
 
         .zen-view { display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 24px; min-height: 100%; justify-content: center; }
-        .zen-card { width: 100%; max-width: 320px; background: linear-gradient(180deg, var(--sk-card-top) 0%, var(--sk-card-bottom) 100%); border: 1px solid var(--sk-border); border-radius: 24px; box-shadow: inset 0 1px 1px var(--sk-inset), 0 12px 24px var(--sk-shadow), 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; align-items: center; padding: 32px 24px; position: relative; border-top: 8px solid var(--md-primary); transition: transform 0.3s, box-shadow 0.3s; }
+        .zen-card { width: 100%; max-width: 320px; padding: 32px 24px; border-top: 8px solid var(--md-primary); }
         .zen-title { font-size: 20px; font-weight: 700; color: var(--md-on-surface); text-align: center; margin-top: 16px; line-height: 1.4; }
         .zen-quote { font-style: italic; font-size: 14px; color: var(--md-on-surface-variant); text-align: center; margin-top: 16px; padding: 0 16px; border-left: 2px solid var(--md-primary); border-right: 2px solid var(--md-primary); }
-        .zen-btn { margin-top: 24px; padding: 12px 32px; border-radius: 24px; background: linear-gradient(180deg, #0096ff 0%, #0070e0 100%); border: 1px solid #0050a0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 8px rgba(0,0,0,0.3); color: white; font-weight: bold; font-size: 16px; cursor: pointer; text-shadow: 0 -1px 0 rgba(0,0,0,0.3); transition: transform 0.2s; }
-        .zen-btn:active { transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(0,0,0,0.4); }
 
         .quotes-feed { display: flex; flex-direction: column; gap: 16px; }
-        .quote-card { background: var(--md-surface); border-radius: 12px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid var(--md-surface-container); cursor: pointer; display: flex; flex-direction: column; gap: 12px; transition: transform 0.2s; }
+        .quote-card { background: var(--md-surface); border-radius: var(--ui-radius-card); padding: 18px; box-shadow: var(--ui-card-shadow); border: var(--ui-card-border); cursor: pointer; display: flex; flex-direction: column; gap: 12px; transition: all 0.4s ease; }
         .quote-card:active { transform: scale(0.98); }
         .quote-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .quote-book-title { font-size: 13px; font-weight: 600; color: var(--md-primary); display: flex; align-items: center; gap: 4px; }
         .quote-text { font-size: 15px; line-height: 1.6; color: var(--md-on-surface); font-style: italic; border-left: 3px solid var(--md-outline); padding-left: 12px; }
         
-        .fab { position: fixed; bottom: 90px; right: 20px; background: linear-gradient(180deg, #0096ff 0%, #0070e0 100%); border: 1px solid #0050a0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 8px rgba(0,0,0,0.3); color: white; border-radius: 50%; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; z-index: 20; cursor: pointer; transition: opacity 0.15s ease-in-out, transform 0.2s; text-shadow: 0 -1px 0 rgba(0,0,0,0.3); }
-        .fab:active { transform: translateY(2px) scale(0.95); box-shadow: inset 0 2px 6px rgba(0,0,0,0.4); }
+        /* 全局统一的按钮与悬浮组件语言 */
+        .btn-primary, .btn-secondary, .fab, .zen-btn {
+            display: flex; align-items: center; justify-content: center; font-weight: 700 !important; cursor: pointer;
+            border-radius: var(--ui-radius-btn); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-primary, .fab, .zen-btn {
+            background: var(--ui-btn-primary-bg); border: var(--ui-btn-primary-border); box-shadow: var(--ui-btn-primary-shadow);
+            color: var(--ui-btn-primary-color) !important; text-shadow: var(--ui-btn-primary-text-shadow);
+        }
+        .btn-secondary {
+            background: var(--ui-btn-secondary-bg); border: var(--ui-btn-secondary-border); box-shadow: var(--ui-btn-secondary-shadow);
+            color: var(--ui-btn-secondary-color) !important; text-shadow: var(--ui-btn-secondary-text-shadow);
+        }
+        .btn-primary:active, .btn-secondary:active, .fab:active, .zen-btn:active { transform: var(--ui-active-transform); box-shadow: var(--ui-active-shadow); }
+
+        .fab { position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px; z-index: 20; will-change: transform, opacity;}
+        .zen-btn { margin-top: 24px; padding: 12px 32px; font-size: 16px; border-radius: 24px;}
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 72px; background-color: var(--md-surface); display: flex; align-items: center; justify-content: space-around; z-index: 30; border-top: 1px solid var(--md-outline); padding-bottom: env(safe-area-inset-bottom); }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 72px; background-color: var(--md-surface); display: flex; align-items: center; justify-content: space-around; z-index: 30; border-top: 1px solid var(--md-outline); padding-bottom: env(safe-area-inset-bottom); transition: background-color 0.4s ease;}
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: var(--md-on-surface-variant); cursor: pointer; flex: 1; }
         .nav-item.active { color: var(--md-primary); }
         .nav-item .icon { font-variation-settings: 'FILL' 0; transition: font-variation-settings 0.2s, transform 0.2s; }
@@ -139,20 +227,27 @@
         .backdrop { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 250; opacity: 0; pointer-events: none; transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1); will-change: opacity; }
         .backdrop.active { opacity: 1; pointer-events: auto; }
         
-        .drawer { position: absolute; top: 0; width: 280px; height: 100vh; height: 100dvh; background-color: var(--md-surface); z-index: 260; display: flex; flex-direction: column; will-change: transform; visibility: hidden; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s; }
-        .drawer.active { visibility: visible; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s; }
+        /* 面板容器统一毛玻璃/实体切换 */
+        .drawer, .bottom-sheet, .selection-toolbar, .modal {
+            background: var(--ui-panel-bg); box-shadow: var(--ui-panel-shadow); border: var(--ui-panel-border);
+            backdrop-filter: var(--ui-panel-filter); -webkit-backdrop-filter: var(--ui-panel-filter);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .drawer { position: absolute; top: 0; width: 280px; height: 100vh; height: 100dvh; z-index: 260; display: flex; flex-direction: column; will-change: transform; visibility: hidden; }
+        .drawer.active { visibility: visible; }
         .drawer-left { left: 0; transform: translateX(-100%); }
         .drawer-left.active { transform: translateX(0); }
         .drawer-right { right: 0; transform: translateX(100%); }
         .drawer-right.active { transform: translateX(0); }
         
-        .drawer-header { flex-shrink: 0; padding: 32px 24px 16px; border-bottom: 1px solid var(--md-surface-container); }
+        .drawer-header { flex-shrink: 0; padding: 32px 24px 16px; border-bottom: 1px solid rgba(128,128,128,0.1); }
         .drawer-title { font-size: 22px; font-weight: 700; color: var(--md-primary); display: flex; align-items: center; gap: 8px; }
         .drawer-content { flex: 1; overflow-y: auto; padding: 0 0 60px 0; overscroll-behavior-y: contain; }
         
         .category-title { font-size: 11px; font-weight: 700; color: var(--md-on-surface-variant); padding: 16px 24px 8px; text-transform: uppercase; letter-spacing: 1px; }
         .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; width: 100%; border: none; background: none; font-size: 14px; color: var(--md-on-surface); cursor: pointer; transition: background 0.2s;}
-        .menu-item:hover { background: var(--md-surface-container); }
+        .menu-item:hover { background: rgba(128,128,128,0.05); }
         .menu-left { display: flex; align-items: center; gap: 16px; }
         
         .toggle-switch { width: 36px; height: 20px; background: var(--md-outline); border-radius: 10px; position: relative; transition: background-color 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15); }
@@ -160,11 +255,11 @@
         .toggle-switch.active { background: var(--md-primary); }
         .toggle-switch.active::after { transform: translateX(16px); }
 
-        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -45%) scale(0.95); background-color: var(--md-surface); width: 85%; max-width: 400px; border-radius: 16px; z-index: 260; opacity: 0; pointer-events: none; display: flex; flex-direction: column; max-height: 80vh; box-shadow: 0 10px 30px rgba(0,0,0,0.2); will-change: transform, opacity; visibility: hidden; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s; }
-        .modal.active { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, -50%) scale(1); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s; }
+        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -45%) scale(0.95); width: 85%; max-width: 400px; border-radius: 16px; z-index: 260; opacity: 0; pointer-events: none; display: flex; flex-direction: column; max-height: 80vh; will-change: transform, opacity; visibility: hidden; }
+        .modal.active { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
         .modal-header { padding: 24px 24px 16px; font-size: 18px; font-weight: 700; }
         .modal-body { padding: 0 24px 24px; overflow-y: auto; font-size: 13px; line-height: 1.6; color: var(--md-on-surface-variant); }
-        .modal-footer { padding: 12px 24px; text-align: right; border-top: 1px solid var(--md-surface-container); }
+        .modal-footer { padding: 12px 24px; text-align: right; border-top: 1px solid rgba(128,128,128,0.1); }
         .btn-text { background: none; border: none; color: var(--md-primary); font-size: 15px; font-weight: 600; padding: 8px 16px; border-radius: 20px; cursor: pointer; }
 
         .heatmap-grid { display: grid; grid-template-rows: repeat(7, 1fr); grid-auto-flow: column; gap: 4px; overflow-x: auto; padding-bottom: 8px; margin-top: 12px;}
@@ -188,10 +283,17 @@
         .detail-tag-add:active { background: rgba(0,0,0,0.1); }
         body[data-theme="dark"] .detail-tag-add { background: rgba(255,255,255,0.1); }
 
-        .detail-stats-row { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 24px; padding: 20px 16px; border-top: 1px solid var(--md-outline); border-bottom: 1px solid var(--md-outline); }
+        /* 详情页专属尊享阅读进度条 */
+        .detail-progress-container { margin: 0 0 24px 0; background: var(--md-surface); border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02); flex-shrink: 0;}
+        .detail-progress-header { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; color: var(--md-on-surface); margin-bottom: 12px; }
+        .detail-progress-track { height: 8px; border-radius: 4px; background: var(--md-surface-container-high); overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
+        .detail-progress-fill { height: 100%; width: 0%; background: rgb(var(--dynamic-rgb)); border-radius: 4px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .detail-stats-row { flex-shrink: 0; display: flex; justify-content: space-around; align-items: center; width: 100%; margin-bottom: 24px; padding: 16px; border-top: 1px solid var(--md-outline); border-bottom: 1px solid var(--md-outline); }
         .detail-stat { display: flex; flex-direction: column; align-items: center; gap: 4px;}
         .detail-stat-val { font-size: 18px; font-weight: 700; color: var(--md-on-surface); }
         .detail-stat-label { font-size: 12px; color: var(--md-on-surface-variant); }
+        
         .rating-section { flex-shrink: 0; width: 100%; background-color: var(--md-surface); border-radius: 12px; padding: 24px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.02); }
         .rating-header { font-size: 15px; font-weight: 600; margin-bottom: 16px; text-align: center; color: var(--md-on-surface); position: relative;}
         
@@ -207,31 +309,11 @@
         .note-card { background-color: var(--md-surface); border-left: 4px solid rgb(var(--dynamic-rgb)); padding: 12px 16px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); font-size: 13px; line-height: 1.5; cursor: pointer; border: 1px solid rgba(0,0,0,0.02); flex-shrink: 0; transition: transform 0.2s; }
         .note-card:active { transform: scale(0.98); }
         
-        .detail-bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; padding: 12px 20px; background-color: var(--md-surface); box-shadow: 0 -4px 12px rgba(0,0,0,0.04); display: flex; gap: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 20;}
-        
-        /* 拟物化按钮 */
-        .btn-primary, .btn-secondary {
-            background: linear-gradient(180deg, var(--sk-btn-top) 0%, var(--sk-btn-bottom) 100%);
-            border: 1px solid var(--sk-border);
-            box-shadow: inset 0 1px 0 var(--sk-inset), 0 2px 3px var(--sk-shadow);
-            color: var(--sk-btn-text) !important;
-            font-weight: bold !important;
-            border-radius: 24px; height: 48px; font-size: 15px; 
-            display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-        }
-        body[data-theme="dark"] .btn-secondary { text-shadow: 0 -1px 0 rgba(0,0,0,0.5); }
-        
-        .btn-primary { 
-            background: linear-gradient(180deg, #0096ff 0%, #0070e0 100%); 
-            color: white !important; 
-            border: 1px solid #0050a0;
-            text-shadow: 0 -1px 0 rgba(0,0,0,0.3);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.3);
-        }
-        .btn-secondary { flex: 1; } .btn-primary { flex: 2; font-size: 16px;}
-        .btn-secondary:active, .btn-primary:active { transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
+        .detail-bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; padding: 12px 20px; background-color: var(--md-surface); box-shadow: 0 -4px 12px rgba(0,0,0,0.04); display: flex; gap: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 20; transition: background-color 0.4s ease;}
+        .detail-bottom-bar .btn-secondary { flex: 1; height: 48px; font-size: 15px; }
+        .detail-bottom-bar .btn-primary { flex: 2; height: 48px; font-size: 16px; }
 
-        /* ================= Reader 全新沉浸式架构 ================= */
+        /* ================= Reader 沉浸式架构 ================= */
         .reader-screen { 
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; 
             background-color: var(--reader-bg) !important; color: var(--reader-color); 
@@ -239,10 +321,7 @@
             transform: translateX(100vw); will-change: transform; visibility: hidden; 
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s; 
         }
-        .reader-screen.active { 
-            transform: translateX(0); visibility: visible; 
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s; 
-        }
+        .reader-screen.active { transform: translateX(0); visibility: visible; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s; }
         
         .reader-header { 
             position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 210;
@@ -259,80 +338,57 @@
             font-size: 11px; opacity: 0.6; 
             transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s; will-change: transform, opacity; 
         }
-        
-        .reader-footer::after {
-            content: ''; position: absolute; bottom: 0; left: 0; height: 2px;
-            background-color: var(--md-primary); width: var(--read-progress, 0%);
-            transition: width 0.3s ease-out; opacity: 0.8;
-        }
+        .reader-footer::after { content: ''; position: absolute; bottom: 0; left: 0; height: 2px; background-color: var(--md-primary); width: var(--read-progress, 0%); transition: width 0.3s ease-out; opacity: 0.8; }
 
         .reader-screen.fullscreen .reader-header { transform: translateY(-100%); opacity: 0; pointer-events: none; }
         .reader-screen.fullscreen .reader-footer { transform: translateY(100%); opacity: 0; pointer-events: none; }
 
-        .bookmark-badge { 
-            position: absolute; bottom: 60px; left: 0; z-index: 250;
-            background: var(--md-primary); color: var(--md-on-primary); 
-            padding: 6px 16px 6px 12px; border-radius: 0 16px 16px 0; 
-            font-size: 12px; font-weight: 600; box-shadow: 2px 2px 8px rgba(0,0,0,0.15); 
-            display: none; pointer-events: none; 
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
+        .bookmark-badge { position: absolute; bottom: 60px; left: 0; z-index: 250; background: var(--md-primary); color: var(--md-on-primary); padding: 6px 16px 6px 12px; border-radius: 0 16px 16px 0; font-size: 12px; font-weight: 600; box-shadow: 2px 2px 8px rgba(0,0,0,0.15); display: none; pointer-events: none; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
         .reader-screen.fullscreen .bookmark-badge { transform: translateY(60px); } 
 
-        .reader-viewport { 
-            width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 200;
-            overflow-y: auto; scroll-behavior: smooth; margin: 0 auto;
-        }
-
+        .reader-viewport { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 200; overflow-y: auto; scroll-behavior: smooth; margin: 0 auto; }
         #reader-progress-label { display: inline-block; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), font-weight 0.2s, color 0.2s; transform-origin: left center; }
         .reader-footer.scrolling #reader-progress-label { transform: scale(1.15); font-weight: 700; color: var(--md-primary); }
 
         #epub-viewer { width: 100%; height: 100%; overflow: hidden; padding: 0 16px; box-sizing: border-box; max-width: 800px; margin: 0 auto; }
-        
-        .txt-content { 
-            padding: 80px 16px 60px 16px; 
-            white-space: pre-wrap; word-wrap: break-word; text-align: justify; 
-            max-width: 800px; margin: 0 auto; box-sizing: border-box;
-        }
+        .txt-content { padding: 80px 16px 60px 16px; white-space: pre-wrap; word-wrap: break-word; text-align: justify; max-width: 800px; margin: 0 auto; box-sizing: border-box; }
         .txt-content * { font-family: inherit !important; font-weight: inherit !important; }
         mark.txt-highlight { background: rgba(0, 132, 255, 0.25); color: inherit; cursor: pointer; border-radius: 2px; }
 
         #pdf-viewer { display: none; height: 100%; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px;}
         
-        .selection-toolbar { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(150%); background: var(--md-surface); box-shadow: 0 8px 24px rgba(0,0,0,0.2); padding: 12px 16px; border-radius: 16px; z-index: 350; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; border: 1px solid var(--md-outline); opacity: 0; pointer-events: none; will-change: transform, opacity; visibility: hidden; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s; }
-        .selection-toolbar.active { transform: translateX(-50%) translateY(0); opacity: 1; visibility: visible; pointer-events: auto; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s; }
+        .selection-toolbar { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(150%); padding: 12px 16px; border-radius: 16px; z-index: 350; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; opacity: 0; pointer-events: none; visibility: hidden; }
+        .selection-toolbar.active { transform: translateX(-50%) translateY(0); opacity: 1; visibility: visible; pointer-events: auto; }
         .selection-text { font-size: 13px; color: var(--md-on-surface-variant); font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 4px; }
+        .selection-toolbar .btn-primary { flex: 2; height: 36px; font-size: 14px; border-radius: 8px;}
+        .selection-toolbar .btn-secondary { flex: 1; height: 36px; font-size: 14px; border-radius: 8px;}
 
-        .bottom-sheet { position: absolute; bottom: 0; left: 0; width: 100%; height: auto; border-radius: 24px 24px 0 0; background: var(--md-surface); z-index: 260; transform: translateY(100%); padding: 24px; box-shadow: 0 -4px 16px rgba(0,0,0,0.1); display:flex; flex-direction:column; gap:20px; will-change: transform; opacity: 0; pointer-events: none; visibility: hidden; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s; }
-        .bottom-sheet.active { transform: translateY(0); visibility: visible; opacity: 1; pointer-events: auto; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s; }
-        
+        .bottom-sheet { position: absolute; bottom: 0; left: 0; width: 100%; height: auto; border-radius: 24px 24px 0 0; z-index: 260; transform: translateY(100%); padding: 24px; display:flex; flex-direction:column; gap:20px; opacity: 0; pointer-events: none; visibility: hidden; }
+        .bottom-sheet.active { transform: translateY(0); visibility: visible; opacity: 1; pointer-events: auto; }
         .settings-row { display: flex; align-items: center; justify-content: space-between; }
         .settings-label { font-size: 14px; font-weight: 500; color: var(--md-on-surface-variant); width: 60px; }
-        .controls-group { display: flex; align-items: center; gap: 12px; background-color: var(--md-surface-container); border-radius: 24px; padding: 4px; flex: 1; justify-content: space-around;}
+        .controls-group { display: flex; align-items: center; gap: 12px; background-color: rgba(128,128,128,0.05); border-radius: 24px; padding: 4px; flex: 1; justify-content: space-around;}
         
-        /* 设置按钮不采用重度拟物，保持清爽 */
         .btn-toggle { background: none; border: none; border-radius: 20px; padding: 6px 16px; font-size: 14px; font-weight: 600; color: var(--md-on-surface); cursor: pointer; transition: background 0.2s, transform 0.2s;}
         .btn-toggle:active { transform: scale(0.9); }
         .btn-toggle.active { background-color: var(--md-surface); box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: var(--md-primary);}
-        
         .theme-circle { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--md-outline); cursor: pointer; transition: transform 0.2s; }
         .theme-circle:active { transform: scale(0.9); }
         .theme-circle.active { border: 2px solid var(--md-primary); transform: scale(1.1); }
 
+        #quote-action-sheet { padding: 32px 24px calc(24px + env(safe-area-inset-bottom)); }
+        #quote-action-sheet .btn-primary { height: 56px; font-size: 16px; border-radius: 16px; }
+        #quote-action-sheet .btn-secondary { height: 56px; font-size: 16px; border-radius: 16px; background: transparent; border: 1px solid rgba(128,128,128,0.2); box-shadow: none; text-shadow: none; color: var(--md-on-surface) !important;}
         #quote-action-preview { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
         .toast { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background-color: var(--md-on-surface); color: var(--md-surface); padding: 10px 20px; border-radius: 24px; font-size: 13px; opacity: 0; z-index: 400; transition: opacity 0.3s; text-align: center; pointer-events:none;}
         .toast.show { opacity: 1; }
         #file-input, #color-picker, #custom-font-input { display: none; }
-        .sync-input { width: 100%; padding: 12px; border: 1px solid var(--md-outline); border-radius: 8px; background-color: var(--md-surface-container); color: var(--md-on-surface); font-size: 16px; text-align: center; letter-spacing: 2px; }
+        .sync-input { width: 100%; padding: 12px; border: 1px solid var(--md-outline); border-radius: 8px; background-color: rgba(128,128,128,0.05); color: var(--md-on-surface); font-size: 16px; text-align: center; letter-spacing: 2px; }
         .sync-code-display { font-size: 32px; font-weight: 700; color: var(--md-primary); text-align: center; letter-spacing: 4px; margin: 16px 0; }
         
-        .toc-item { 
-            padding: 16px 24px; border-bottom: 1px solid var(--md-surface-container); 
-            font-size: 14px; cursor: pointer; display: flex; align-items: center; 
-            justify-content: flex-start; transition: background 0.2s, padding-left 0.2s; 
-        }
-        .toc-item:hover { background: var(--md-surface-container); padding-left: 32px; }
+        .toc-item { padding: 16px 24px; border-bottom: 1px solid rgba(128,128,128,0.1); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: flex-start; transition: background 0.2s, padding-left 0.2s; }
+        .toc-item:hover { background: rgba(128,128,128,0.05); padding-left: 32px; }
         .toc-item::before { content: '•'; color: var(--md-primary); margin-right: 12px; font-size: 18px; line-height: 0; }
     </style>
 </head>
@@ -355,10 +411,16 @@
             <div class="drawer-title">
                 <span class="material-symbols-outlined" style="color: var(--md-primary); font-size: 28px; margin-right: 8px;">menu_book</span> Readlite
             </div>
-            <div class="drawer-subtitle">v0.4.9 · SyncFlow</div>
+            <div class="drawer-subtitle">v0.4.10 · SyncFlow</div>
         </div>
         
         <div class="drawer-content">
+            <div class="category-title">视觉风格 (Visual)</div>
+            <div class="menu-item" onclick="toggleStyle()">
+                <div class="menu-left"><span class="material-symbols-outlined icon">layers</span><span id="style-name">拟物风格</span></div>
+                <div id="toggle-style" class="toggle-switch active"></div>
+            </div>
+
             <div class="category-title">阅读统计 (Stats)</div>
             <div class="menu-item" onclick="openHeatmap()" style="cursor: pointer;">
                 <div class="menu-left"><span class="material-symbols-outlined icon" style="color: var(--md-primary);">schedule</span><span>今日有效阅读</span></div>
@@ -443,16 +505,16 @@
     <div id="changelog-modal" class="modal">
         <div class="modal-header">更新日志</div>
         <div class="modal-body">
-            <div style="font-weight: 700; color: var(--md-primary); margin-bottom: 4px;">v0.4.9 · SyncFlow (终极拟物版)</div>
-            - 🎨 全局拟物化：深度还原 iOS 6 经典刻印、高光与金属质感，触摸反馈极佳。<br>
-            - 💻 双页自适应：完美修复电脑端双页阅读，支持随窗口大小智能无缝切换单/双页，滚轮丝滑翻页。<br>
-            - 🚫 纯净视界：彻底隐藏全局滚动条，让界面回归纯粹。<br>
-            - 🐛 稳定增强：保留全部文案，修复切换 Tab 时的 UI 闪烁问题。<br><br>
+            <div style="font-weight: 700; color: var(--md-primary); margin-bottom: 4px;">v0.4.10 · SyncFlow (终极双引擎版)</div>
+            - ☯️ 双重材质系统：新增「拟物」与「简约」双风格无缝平滑切换。<br>
+            - 🖼️ 海报级书架：移除冗余底部信息，全图满铺，进度条移入详情页尊享胶囊。<br>
+            - 💻 完美双页自适应：电脑端双页模式现在可随窗口大小智能热切换。<br>
+            - 🚫 纯净视界：彻底隐藏全局所有多余滚动条，让界面回归纯粹。<br><br>
             <div style="font-weight: 700; color: var(--md-on-surface-variant); margin-bottom: 4px;">v0.4.x · 演进纪要</div>
-            - 0.4.8：重构底层动画，彻底修复各类闪烁与白边；重做PWA图标。<br>
-            - 0.4.5：增加黄金间距与段落重排补偿。<br>
+            - 0.4.8：重构底层动画，消除阅读白边；重做 PWA 桌面徽标。<br>
+            - 0.4.5：增加黄金间距与 TXT 智能段落重排。<br>
             - 0.4.3：引入纯粹呼吸式全屏与双击唤醒机制。<br>
-            - 0.4.0：引入P2P局域网暗号互传与军事级加密备份。<br>
+            - 0.4.0：引入 P2P 局域网暗号互传与军事级加密备份。<br>
         </div>
         <div class="modal-footer"><button class="btn-text" onclick="closeOverlays()">关闭</button></div>
     </div>
@@ -519,8 +581,17 @@
                 </div>
             </div>
             
+            <div class="detail-progress-container">
+                <div class="detail-progress-header">
+                    <span>阅读进度</span>
+                    <span id="detail-stat-prog-percent">0%</span>
+                </div>
+                <div class="detail-progress-track">
+                    <div class="detail-progress-fill" id="detail-stat-prog-fill"></div>
+                </div>
+            </div>
+
             <div class="detail-stats-row">
-                <div class="detail-stat"><span class="detail-stat-val" id="detail-stat-prog">0%</span><span class="detail-stat-label">进度</span></div>
                 <div class="detail-stat"><span class="detail-stat-val" id="detail-stat-type">TXT</span><span class="detail-stat-label">格式</span></div>
                 <div class="detail-stat"><span class="detail-stat-val" id="detail-stat-date" style="font-size: 14px;">今日</span><span class="detail-stat-label">入库</span></div>
             </div>
@@ -622,19 +693,19 @@
         </div>
     </div>
 
-    <div id="quote-action-sheet" class="bottom-sheet" style="z-index: 360; padding: 32px 24px calc(24px + env(safe-area-inset-bottom));">
+    <div id="quote-action-sheet" class="bottom-sheet" style="z-index: 360;">
         <div style="font-size: 18px; font-weight: 800; color: var(--md-on-surface); margin-bottom: 16px; text-align: center;">划线与笔记</div>
-        <div style="background: var(--md-surface-container); border-radius: 16px; padding: 16px; margin-bottom: 24px; border-left: 4px solid var(--md-primary); box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);">
+        <div style="background: rgba(128,128,128,0.05); border-radius: 16px; padding: 16px; margin-bottom: 24px; border-left: 4px solid var(--md-primary);">
             <div style="font-size: 15px; color: var(--md-on-surface); font-style: italic; line-height: 1.6;" id="quote-action-preview"></div>
         </div>
         <div style="display: flex; flex-direction: column; gap: 16px;">
-            <button class="btn-primary" style="height: 56px; font-size: 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(var(--md-primary-rgb), 0.2);" onclick="executeQuoteAction('trace')">
+            <button class="btn-primary" onclick="executeQuoteAction('trace')">
                 <span class="material-symbols-outlined" style="font-size:22px; margin-right:8px; vertical-align:-5px;">menu_book</span>回到原文溯源
             </button>
-            <button class="btn-secondary" style="height: 56px; font-size: 16px; border-radius: 16px; background: rgba(var(--md-primary-rgb), 0.1); color: var(--md-primary); border: none;" onclick="executeQuoteAction('card')">
+            <button class="btn-secondary" style="color: var(--md-primary);" onclick="executeQuoteAction('card')">
                 <span class="material-symbols-outlined" style="font-size:22px; margin-right:8px; vertical-align:-5px;">photo_camera</span>生成精美卡片
             </button>
-            <button class="btn-secondary" style="height: 56px; font-size: 16px; border-radius: 16px; color: #d93025; background: rgba(217,48,37,0.08); border: none;" onclick="executeQuoteAction('delete')">
+            <button class="btn-secondary" style="color: #d93025; background: rgba(217,48,37,0.08);" onclick="executeQuoteAction('delete')">
                 <span class="material-symbols-outlined" style="font-size:22px; margin-right:8px; vertical-align:-5px;">delete_outline</span>删除此条记录
             </button>
         </div>
@@ -670,12 +741,17 @@
     let currentBookContext = { type: 'txt', totalMins: 0 };
     let epubWheelTimeout = null;
     let activeQuoteContext = { bookId: null, cfi: null, text: null };
+    let windowResizeTimeout = null;
 
     function initApp() {
+        document.body.setAttribute('data-style', localStorage.getItem('readlite_style') || 'skeuomorph');
         setTheme(currentTheme); 
         loadCustomFontIfAny(); updateTypographyUI();
-        generatePWAIcon(); 
         
+        const styleToggleStr = document.body.getAttribute('data-style') === 'skeuomorph' ? '拟物风格' : '简约风格';
+        document.getElementById('style-name').innerText = styleToggleStr;
+        if(document.body.getAttribute('data-style') === 'skeuomorph') document.getElementById('toggle-style').classList.add('active'); else document.getElementById('toggle-style').classList.remove('active');
+
         const todayStr = new Date().toISOString().slice(0,10);
         let historyObj = JSON.parse(localStorage.getItem('rl_history') || '{}');
         if (!historyObj[todayStr] && localStorage.getItem('rl_mins')) { historyObj[todayStr] = parseInt(localStorage.getItem('rl_mins')); localStorage.setItem('rl_history', JSON.stringify(historyObj)); }
@@ -751,16 +827,38 @@
         document.getElementById('txt-viewer').addEventListener('click', (e) => {
             let mark = e.target.closest('mark.txt-highlight'); if (mark && confirm("确认删除这条划线记录吗？")) window.removeNoteFromDBByCfi(mark.dataset.cfi);
         });
+
+        // 监听电脑端窗口重绘调整 Epub 双页自适应
+        window.addEventListener('resize', () => {
+            if (activeBookId && epubRendition && epubBookInstance && document.getElementById('reader-container').classList.contains('active')) {
+                clearTimeout(windowResizeTimeout);
+                windowResizeTimeout = setTimeout(() => {
+                    const isWideScreen = window.innerWidth > 800;
+                    const useDouble = auroraPrefs.doublePage && isWideScreen;
+                    let currentLoc = epubRendition.currentLocation();
+                    let cfi = currentLoc && currentLoc.start ? currentLoc.start.cfi : null;
+                    
+                    epubRendition.destroy();
+                    document.getElementById('epub-viewer').innerHTML = '';
+                    
+                    epubRendition = epubBookInstance.renderTo("epub-viewer", { width: "100%", height: "100%", flow: useDouble ? "paginated" : "scrolled", minSpreadWidth: 800, manager: "continuous" });
+                    registerEpubHooks(epubRendition, useDouble, isWideScreen);
+                    applyTypographyToReader();
+                    epubRendition.display(cfi || currentBookContext.progressDetail || undefined);
+                }, 300);
+            }
+        });
     }
 
-    function generatePWAIcon() {
-        const canvas = document.createElement('canvas'); canvas.width = 192; canvas.height = 192; const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#0084ff'; ctx.beginPath(); ctx.roundRect(0, 0, 192, 192, 38.4); ctx.fill();
-        ctx.font = '96px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('📖', 96, 96);
-        const pngData = canvas.toDataURL('image/png');
-        let link = document.querySelector('link[rel="apple-touch-icon"]');
-        if(!link) { link = document.createElement('link'); link.rel = 'apple-touch-icon'; document.head.appendChild(link); }
-        link.href = pngData;
+    function toggleStyle() {
+        let body = document.body;
+        let current = body.getAttribute('data-style') || 'skeuomorph';
+        let next = current === 'skeuomorph' ? 'minimal' : 'skeuomorph';
+        body.setAttribute('data-style', next);
+        localStorage.setItem('readlite_style', next);
+        document.getElementById('style-name').innerText = next === 'skeuomorph' ? '拟物风格' : '简约风格';
+        document.getElementById('toggle-style').className = `toggle-switch ${next === 'skeuomorph' ? 'active' : ''}`;
+        showToast("风格已平滑切换");
     }
 
     window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; });
@@ -960,15 +1058,28 @@
         
         const frag = document.createDocumentFragment();
         books.forEach((b) => {
-            const c = document.createElement('div'); c.className = 'book-card'; const f = getBookColor(b); 
+            const w = document.createElement('div');
+            w.className = 'book-item-wrapper';
+            w.onclick = () => openBookDetail(b.id);
+            
+            const f = getBookColor(b); 
+            const c = document.createElement('div');
+            c.className = 'book-card';
             c.style.borderLeftColor = `rgb(${f})`; 
             c.style.setProperty('--book-color', `rgb(${f})`); 
             c.style.setProperty('--book-rgb', f);
-            c.onclick = () => openBookDetail(b.id);
-            const p = Math.round((b.progress || 0) * 100), i = b.type === 'epub' ? 'menu_book' : b.type === 'pdf' ? 'picture_as_pdf' : 'segment';
-            const coverHtml = b.cover ? `<img src="${b.cover}" style="width:100%; height:100%; object-fit:cover; display:block;">` : `<span class="material-symbols-outlined icon">${i}</span><div class="book-title">${b.title}</div>`;
-            c.innerHTML = `<div class="book-cover-placeholder" style="${b.cover ? 'padding:0;' : ''}">${coverHtml}</div><div class="book-info-bottom"><div class="list-title-display">${b.title}</div><div class="progress-bar-container"><div class="progress-bar-fill" style="width:${p}%;"></div></div></div>`;
-            frag.appendChild(c);
+            
+            const i = b.type === 'epub' ? 'menu_book' : b.type === 'pdf' ? 'picture_as_pdf' : 'segment';
+            const coverHtml = b.cover ? `<img src="${b.cover}" style="width:100%; height:100%; object-fit:cover; display:block;">` : `<span class="material-symbols-outlined icon">${i}</span><div style="font-size:13px; font-weight:600; padding:0 12px; margin-top:12px; opacity:0.85;">${b.title}</div>`;
+            c.innerHTML = `<div class="book-cover-placeholder" style="${b.cover ? 'padding:0;' : ''}">${coverHtml}</div>`;
+            
+            const t = document.createElement('div');
+            t.className = 'book-outside-title';
+            t.innerText = b.title;
+
+            w.appendChild(c);
+            w.appendChild(t);
+            frag.appendChild(w);
         });
         s.appendChild(frag);
     }
@@ -1115,7 +1226,10 @@
                 const coverWrapper = document.getElementById('detail-cover'); coverWrapper.style.borderLeftColor = `rgb(${rgbStr})`;
                 if (b.cover) { coverWrapper.innerHTML = `<img src="${b.cover}" style="width:100%; height:100%; object-fit:cover; display:block;">`; } else { coverWrapper.innerHTML = `<span class="material-symbols-outlined icon" id="detail-cover-icon" style="color:rgb(${rgbStr});">${b.type === 'epub' ? 'menu_book' : 'segment'}</span>`; }
                 document.getElementById('detail-title').innerText = b.title; document.getElementById('detail-author').innerText = b.author || "本地文件"; const dateObj = new Date(b.addedDate || b.lastRead || Date.now()); document.getElementById('detail-stat-date').innerText = dateObj.toLocaleDateString('zh-CN');
-                const p = Math.round((b.progress || 0) * 100); document.getElementById('detail-stat-prog').innerText = p + "%"; document.getElementById('detail-read-btn').innerHTML = `<span>${p === 0 ? '开始阅读' : p === 100 ? '重新阅读' : '继续阅读'}</span>`;
+                const p = Math.round((b.progress || 0) * 100); 
+                document.getElementById('detail-stat-prog-percent').innerText = p + "%"; 
+                setTimeout(() => { document.getElementById('detail-stat-prog-fill').style.width = p + "%"; }, 100);
+                document.getElementById('detail-read-btn').innerHTML = `<span>${p === 0 ? '开始阅读' : p === 100 ? '重新阅读' : '继续阅读'}</span>`;
                 updateDetailFavIcon(b.isFavorite); updateStarsUI(b.rating || 0); renderTagsInDetail(b);
                 const nList = document.getElementById('detail-notes-list'), nSec = document.getElementById('detail-notes-section');
                 if(b.notes && b.notes.length > 0) {
@@ -1138,7 +1252,7 @@
     function addTagToBook() { const newTag = prompt("输入新标签"); if(!newTag || !newTag.trim()) return; const tx = db.transaction(['books'], 'readwrite'); const store = tx.objectStore('books'); store.get(currentDetailBookId).onsuccess = (e) => { const b = e.target.result; if(!b.tags) b.tags = []; if(!b.tags.includes(newTag.trim())) { b.tags.push(newTag.trim()); store.put(b).onsuccess = () => { renderTagsInDetail(b); loadBookshelf(); }; } }; }
     function removeTagFromBook(tag) { if(confirm(`确定要移除标签 #${tag} 吗？`)) { const tx = db.transaction(['books'], 'readwrite'); const store = tx.objectStore('books'); store.get(currentDetailBookId).onsuccess = (e) => { const b = e.target.result; b.tags = b.tags.filter(t => t !== tag); store.put(b).onsuccess = () => { renderTagsInDetail(b); loadBookshelf(); }; }; } }
     
-    function closeBookDetail() { document.getElementById('detail-screen').classList.remove('active'); loadBookshelf(); }
+    function closeBookDetail() { document.getElementById('detail-screen').classList.remove('active'); document.getElementById('detail-stat-prog-fill').style.width = "0%"; loadBookshelf(); }
     function deleteCurrentDetailBook() { if(confirm("确定移出书架吗？")) { db.transaction(['books'], 'readwrite').objectStore('books').delete(currentDetailBookId).onsuccess = () => { closeBookDetail(); showToast("已删除"); }; } }
     
     function setRating(v) { if(!currentDetailBookId) return; const s = db.transaction(['books'], 'readwrite').objectStore('books'); s.get(currentDetailBookId).onsuccess = (e) => { const b = e.target.result; b.rating = v; s.put(b).onsuccess = () => updateStarsUI(v); }; }
@@ -1253,15 +1367,8 @@
         v.innerHTML = `<a href="${url}" download="${b.title}.pdf" style="padding: 14px 36px; background-color: var(--md-primary); color: white; border-radius: 28px; text-decoration: none;">调用系统阅读器打开</a>`;
     }
 
-    function showEpub(b) {
-        document.getElementById('txt-viewer').style.display = 'none'; document.getElementById('pdf-viewer').style.display = 'none';
-        const v = document.getElementById('epub-viewer'); v.style.display = 'block'; v.innerHTML = '';
-        
-        const useDouble = auroraPrefs.doublePage; 
-        epubBookInstance = ePub(b.content); 
-        epubRendition = epubBookInstance.renderTo("epub-viewer", { width: "100%", height: "100%", flow: useDouble ? "paginated" : "scrolled", minSpreadWidth: 800, manager: "continuous" });
-        
-        epubRendition.hooks.content.register(function(contents) {
+    function registerEpubHooks(rendition, useDouble, isWideScreen) {
+        rendition.hooks.content.register(function(contents) {
             let s = contents.document.createElement('style'); s.id = 'rl-style'; s.innerHTML = getEpubCSS(); contents.document.head.appendChild(s);
             
             contents.document.addEventListener('click', (e) => { 
@@ -1287,10 +1394,10 @@
                 const container = document.getElementById('reader-container'); const footer = document.getElementById('reader-footer');
                 footer.classList.add('scrolling'); clearTimeout(readerScrollTimeout); readerScrollTimeout = setTimeout(() => { footer.classList.remove('scrolling'); }, 200);
                 
-                if (useDouble) {
+                if (useDouble && isWideScreen) {
                     e.preventDefault();
                     if(epubWheelTimeout) return; epubWheelTimeout = setTimeout(() => { epubWheelTimeout = null; }, 150); 
-                    if (e.deltaY > 0) epubRendition.next(); else epubRendition.prev();
+                    if (e.deltaY > 0) rendition.next(); else rendition.prev();
                     if (e.deltaY > 0) { if (!container.classList.contains('fullscreen') && !hideTimer) { hideTimer = setTimeout(() => { container.classList.add('fullscreen'); hideTimer = null; }, 3000); }
                     } else if (e.deltaY < 0) { container.classList.remove('fullscreen'); clearTimeout(hideTimer); hideTimer = null; }
                 } else {
@@ -1299,6 +1406,17 @@
                 }
             }, {passive: false});
         });
+    }
+
+    function showEpub(b) {
+        document.getElementById('txt-viewer').style.display = 'none'; document.getElementById('pdf-viewer').style.display = 'none';
+        const v = document.getElementById('epub-viewer'); v.style.display = 'block'; v.innerHTML = '';
+        
+        const isWideScreen = window.innerWidth > 800; const useDouble = auroraPrefs.doublePage && isWideScreen;
+        epubBookInstance = ePub(b.content); 
+        epubRendition = epubBookInstance.renderTo("epub-viewer", { width: "100%", height: "100%", flow: useDouble ? "paginated" : "scrolled", minSpreadWidth: 800, manager: "continuous" });
+        
+        registerEpubHooks(epubRendition, useDouble, isWideScreen);
 
         applyTypographyToReader(); epubRendition.display(b.progressDetail || undefined);
         
