@@ -22,7 +22,10 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
     <style>
-        /* ================= Base Themes ================= */
+        /* 全局隐藏滚动条 */
+        ::-webkit-scrollbar { display: none; width: 0; height: 0; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+
         :root {
             --md-primary: #0084ff; --md-on-primary: #ffffff; --md-background: #f7f9fa;
             --md-surface: #ffffff; --md-surface-container: #f0f4f9; --md-surface-container-high: #e2e8f0;
@@ -30,11 +33,37 @@
             --md-outline: #dadce0; --md-accent: #e8f0fe; --md-on-accent: #1967d2;
             --reader-bg: #faf9f7; --reader-color: #2b2b2b;
             --dynamic-rgb: 0, 132, 255; 
-            --md-primary-rgb: 0, 132, 255; /* For Heatmap */
+            --md-primary-rgb: 0, 132, 255;
+            
+            /* 拟物化参数 */
+            --sk-card-top: #fdfdfd; --sk-card-bottom: #e0e0e0; --sk-border: #c0c0c0;
+            --sk-inset: rgba(255,255,255,0.8); --sk-shadow: rgba(0,0,0,0.2);
+            --sk-btn-top: #f0f0f0; --sk-btn-bottom: #dcdcdc; --sk-btn-text: #333;
+            --sk-search-bg: #e5e5e5; --sk-search-inset: rgba(0,0,0,0.15);
         }
-        body[data-theme="dark"] { --md-primary: #66b2ff; --md-on-primary: #003062; --md-background: #121212; --md-surface: #1e1e1e; --md-surface-container: #2b2b2b; --md-surface-container-high: #333333; --md-surface-variant: #444746; --md-on-surface: #e3e3e3; --md-on-surface-variant: #c4c7c5; --md-outline: #555; --reader-bg: #1a1a1a; --reader-color: #d1d1d1; --md-primary-rgb: 102, 178, 255; }
-        body[data-theme="sepia"] { --md-background: #f4ecd8; --md-surface: #fdf6e3; --md-surface-container: #e9e1c9; --md-surface-container-high: #dfd7be; --md-on-surface: #5b4636; --md-on-surface-variant: #7a614a; --md-outline: #a38d7a; --reader-bg: #fdf6e3; --reader-color: #4a3424; }
-        body[data-theme="eink"] { --md-primary: #000000; --md-on-primary: #ffffff; --md-background: #ffffff; --md-surface: #ffffff; --md-surface-container: #f0f0f0; --md-surface-container-high: #e0e0e0; --md-surface-variant: #dddddd; --md-on-surface: #000000; --md-on-surface-variant: #333333; --md-outline: #000000; --reader-bg: #ffffff; --reader-color: #000000; filter: grayscale(100%) contrast(1.1); --md-primary-rgb: 0, 0, 0;}
+        body[data-theme="dark"] { 
+            --md-primary: #66b2ff; --md-on-primary: #003062; --md-background: #000000; 
+            --md-surface: #121212; --md-surface-container: #1e1e1e; --md-surface-container-high: #2b2b2b; 
+            --md-surface-variant: #444746; --md-on-surface: #e3e3e3; --md-on-surface-variant: #c4c7c5; 
+            --md-outline: #555; --reader-bg: #000000; --reader-color: #d1d1d1; --md-primary-rgb: 102, 178, 255; 
+            
+            /* 深色拟物化参数 */
+            --sk-card-top: #2b2b2b; --sk-card-bottom: #1e1e1e; --sk-border: #111;
+            --sk-inset: rgba(255,255,255,0.05); --sk-shadow: rgba(0,0,0,0.8);
+            --sk-btn-top: #333; --sk-btn-bottom: #222; --sk-btn-text: #e3e3e3;
+            --sk-search-bg: #111; --sk-search-inset: rgba(0,0,0,0.5);
+        }
+        body[data-theme="sepia"] { 
+            --md-background: #f4ecd8; --md-surface: #fdf6e3; --md-surface-container: #e9e1c9; 
+            --md-surface-container-high: #dfd7be; --md-on-surface: #5b4636; --md-on-surface-variant: #7a614a; 
+            --md-outline: #a38d7a; --reader-bg: #fdf6e3; --reader-color: #4a3424; 
+        }
+        body[data-theme="eink"] { 
+            --md-primary: #000000; --md-on-primary: #ffffff; --md-background: #ffffff; 
+            --md-surface: #ffffff; --md-surface-container: #f0f0f0; --md-surface-container-high: #e0e0e0; 
+            --md-surface-variant: #dddddd; --md-on-surface: #000000; --md-on-surface-variant: #333333; 
+            --md-outline: #000000; --reader-bg: #ffffff; --reader-color: #000000; filter: grayscale(100%) contrast(1.1); --md-primary-rgb: 0, 0, 0;
+        }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Roboto', 'Noto Sans SC', sans-serif; background-color: var(--md-background); color: var(--md-on-surface); height: 100vh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; transition: background-color 0.3s, color 0.3s; }
@@ -45,46 +74,65 @@
 
         .app-bar { flex-shrink: 0; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background-color: var(--md-background); z-index: 10; }
         .app-bar-left { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; color: var(--md-on-surface); }
-        .search-container { flex-shrink: 0; padding: 8px 20px 16px; background-color: var(--md-background); }
-        .search-box { display: flex; align-items: center; background-color: var(--md-surface); border: 1px solid var(--md-outline); border-radius: 24px; padding: 0 16px; height: 44px; }
+
+        .search-container { flex-shrink: 0; padding: 8px 20px 16px; background-color: var(--md-background); display: block; transition: opacity 0.15s ease-in-out; }
+        /* 拟物化搜索框 */
+        .search-box { display: flex; align-items: center; background: var(--sk-search-bg); border: 1px solid var(--sk-border); box-shadow: inset 0 2px 4px var(--sk-search-inset); border-radius: 24px; padding: 0 16px; height: 44px; transition: box-shadow 0.2s; }
+        .search-box:focus-within { box-shadow: inset 0 2px 4px var(--sk-search-inset), 0 0 0 2px var(--md-primary); border-color: transparent; }
         .search-box input { flex: 1; border: none; background: none; outline: none; font-size: 15px; color: var(--md-on-surface); padding-left: 12px; }
 
-        .tags-filter-bar { flex-shrink: 0; display: flex; gap: 8px; overflow-x: auto; padding: 0 20px 16px; scrollbar-width: none; }
-        .tags-filter-bar::-webkit-scrollbar { display: none; }
+        .tags-filter-bar { flex-shrink: 0; display: flex; gap: 8px; overflow-x: auto; padding: 8px 20px 16px; scrollbar-width: none; }
         .tag-chip { flex-shrink: 0; padding: 6px 16px; border-radius: 16px; font-size: 13px; font-weight: 600; background-color: var(--md-surface); border: 1px solid var(--md-outline); color: var(--md-on-surface-variant); cursor: pointer; transition: 0.2s; }
         .tag-chip.active { background-color: var(--md-primary); color: var(--md-on-primary); border-color: var(--md-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
 
+        #main-content-scroll { transition: opacity 0.15s ease-in-out; }
         .main-content { flex: 1; overflow-y: auto; padding: 0 20px 100px; overscroll-behavior-y: contain; }
         .bookshelf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 28px 20px; }
         @media (min-width: 600px) { .bookshelf-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); } }
         .bookshelf-grid.list-view { display: flex; flex-direction: column; gap: 16px; }
 
-        .book-card { background-color: var(--md-surface); border-radius: 4px 10px 10px 4px; display: flex; flex-direction: column; position: relative; cursor: pointer; aspect-ratio: 1 / 1.45; box-shadow: -3px 0 6px rgba(0,0,0,0.04) inset, 2px 4px 10px rgba(0,0,0,0.06); border-left: 6px solid var(--md-primary); overflow: hidden; transition: transform 0.2s; will-change: transform; }
-        .book-card::after { content: ''; position: absolute; top: 4px; right: 2px; bottom: 4px; width: 3px; background: repeating-linear-gradient(to bottom, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px); border-radius: 2px; z-index: 5; pointer-events: none; }
-        .list-view .book-card { flex-direction: row; aspect-ratio: auto; height: 100px; border-radius: 6px 10px 10px 6px; border-left: 8px solid var(--md-primary); }
+        /* 拟物化卡片 */
+        .book-card { 
+            background: linear-gradient(180deg, var(--sk-card-top) 0%, var(--sk-card-bottom) 100%); 
+            border-radius: 10px; 
+            border: 1px solid var(--sk-border);
+            display: flex; flex-direction: column; position: relative; cursor: pointer; aspect-ratio: 1 / 1.45; 
+            box-shadow: inset 0 1px 1px var(--sk-inset), 0 4px 6px var(--sk-shadow), 0 1px 2px rgba(0,0,0,0.1); 
+            border-left: 6px solid var(--md-primary); overflow: hidden; 
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease; 
+        }
+        .book-card:active { transform: translateY(2px); box-shadow: inset 0 2px 4px var(--sk-shadow); }
+        .list-view .book-card { flex-direction: row; aspect-ratio: auto; height: 100px; border-radius: 6px 10px 10px 6px; border-left: 8px solid var(--md-primary); box-shadow: inset 0 1px 1px var(--sk-inset), 0 4px 6px var(--sk-shadow); }
         .book-cover-placeholder { flex: 1; background: linear-gradient(135deg, var(--md-surface-container), var(--md-surface-container-high)); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; text-align: center; overflow: hidden;}
         .list-view .book-cover-placeholder { flex: 0 0 70px; padding: 6px; }
-        .book-cover-placeholder span.icon { font-size: 36px; margin-bottom: 8px; color: var(--book-color, var(--md-primary)); }
-        .book-info-bottom { background-color: var(--md-surface); padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; }
-        .list-view .book-info-bottom { flex: 1; justify-content: center; padding: 12px 16px; gap: 8px; }
+        .book-cover-placeholder span.icon { font-size: 36px; margin-bottom: 8px; color: var(--book-color, var(--md-primary)); text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .book-info-bottom { padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--sk-border); }
+        .list-view .book-info-bottom { flex: 1; justify-content: center; padding: 12px 16px; gap: 8px; border-top: none; border-left: 1px solid var(--sk-border); }
         .list-title-display { font-size: 15px; font-weight: 700; display: none; }
         .list-view .list-title-display { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .progress-bar-container { width: 100%; height: 3px; background-color: var(--md-surface-container-high); border-radius: 2px; }
+        .progress-bar-container { width: 100%; height: 3px; background-color: var(--md-surface-container-high); border-radius: 2px; box-shadow: inset 0 1px 1px rgba(0,0,0,0.1); }
         .progress-bar-fill { height: 100%; width: 0%; background-color: var(--book-color, var(--md-primary)); border-radius: 2px; transition: width 0.3s ease;}
 
+        .zen-view { display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 24px; min-height: 100%; justify-content: center; }
+        .zen-card { width: 100%; max-width: 320px; background: linear-gradient(180deg, var(--sk-card-top) 0%, var(--sk-card-bottom) 100%); border: 1px solid var(--sk-border); border-radius: 24px; box-shadow: inset 0 1px 1px var(--sk-inset), 0 12px 24px var(--sk-shadow), 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; align-items: center; padding: 32px 24px; position: relative; border-top: 8px solid var(--md-primary); transition: transform 0.3s, box-shadow 0.3s; }
+        .zen-title { font-size: 20px; font-weight: 700; color: var(--md-on-surface); text-align: center; margin-top: 16px; line-height: 1.4; }
+        .zen-quote { font-style: italic; font-size: 14px; color: var(--md-on-surface-variant); text-align: center; margin-top: 16px; padding: 0 16px; border-left: 2px solid var(--md-primary); border-right: 2px solid var(--md-primary); }
+        .zen-btn { margin-top: 24px; padding: 12px 32px; border-radius: 24px; background: linear-gradient(180deg, #0096ff 0%, #0070e0 100%); border: 1px solid #0050a0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 8px rgba(0,0,0,0.3); color: white; font-weight: bold; font-size: 16px; cursor: pointer; text-shadow: 0 -1px 0 rgba(0,0,0,0.3); transition: transform 0.2s; }
+        .zen-btn:active { transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(0,0,0,0.4); }
+
         .quotes-feed { display: flex; flex-direction: column; gap: 16px; }
-        .quote-card { background: var(--md-surface); border-radius: 12px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid var(--md-surface-container); cursor: pointer; display: flex; flex-direction: column; gap: 12px; }
+        .quote-card { background: var(--md-surface); border-radius: 12px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid var(--md-surface-container); cursor: pointer; display: flex; flex-direction: column; gap: 12px; transition: transform 0.2s; }
+        .quote-card:active { transform: scale(0.98); }
         .quote-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .quote-book-title { font-size: 13px; font-weight: 600; color: var(--md-primary); display: flex; align-items: center; gap: 4px; }
         .quote-text { font-size: 15px; line-height: 1.6; color: var(--md-on-surface); font-style: italic; border-left: 3px solid var(--md-outline); padding-left: 12px; }
-        .note-text { font-size: 15px; line-height: 1.6; color: var(--md-on-surface); }
         
-        .fab { position: fixed; bottom: 90px; right: 20px; background-color: var(--md-surface); color: var(--md-primary); border: 1px solid var(--md-outline); border-radius: 50%; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 20; cursor: pointer; will-change: transform;}
+        .fab { position: fixed; bottom: 90px; right: 20px; background: linear-gradient(180deg, #0096ff 0%, #0070e0 100%); border: 1px solid #0050a0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 8px rgba(0,0,0,0.3); color: white; border-radius: 50%; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; z-index: 20; cursor: pointer; transition: opacity 0.15s ease-in-out, transform 0.2s; text-shadow: 0 -1px 0 rgba(0,0,0,0.3); }
+        .fab:active { transform: translateY(2px) scale(0.95); box-shadow: inset 0 2px 6px rgba(0,0,0,0.4); }
+        
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 72px; background-color: var(--md-surface); display: flex; align-items: center; justify-content: space-around; z-index: 30; border-top: 1px solid var(--md-outline); padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: var(--md-on-surface-variant); cursor: pointer; flex: 1; }
         .nav-item.active { color: var(--md-primary); }
-        
-        /* 修复：选中状态图标填满动画 */
         .nav-item .icon { font-variation-settings: 'FILL' 0; transition: font-variation-settings 0.2s, transform 0.2s; }
         .nav-item.active .icon { font-variation-settings: 'FILL' 1; transform: scale(1.1); }
 
@@ -97,32 +145,29 @@
         .drawer-left.active { transform: translateX(0); }
         .drawer-right { right: 0; transform: translateX(100%); }
         .drawer-right.active { transform: translateX(0); }
-        .drawer-header { flex-shrink: 0; padding: 32px 24px 24px; border-bottom: 1px solid var(--md-surface-container); }
+        
+        .drawer-header { flex-shrink: 0; padding: 32px 24px 16px; border-bottom: 1px solid var(--md-surface-container); }
         .drawer-title { font-size: 22px; font-weight: 700; color: var(--md-primary); display: flex; align-items: center; gap: 8px; }
-        .drawer-subtitle { font-size: 13px; color: var(--md-on-surface-variant); margin-top: 4px; }
         .drawer-content { flex: 1; overflow-y: auto; padding: 0 0 60px 0; overscroll-behavior-y: contain; }
+        
         .category-title { font-size: 11px; font-weight: 700; color: var(--md-on-surface-variant); padding: 16px 24px 8px; text-transform: uppercase; letter-spacing: 1px; }
         .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; width: 100%; border: none; background: none; font-size: 14px; color: var(--md-on-surface); cursor: pointer; transition: background 0.2s;}
         .menu-item:hover { background: var(--md-surface-container); }
         .menu-left { display: flex; align-items: center; gap: 16px; }
         
-        .toggle-switch { width: 36px; height: 20px; background: var(--md-outline); border-radius: 10px; position: relative; transition: background-color 0.2s; }
-        .toggle-switch::after { content: ''; position: absolute; width: 16px; height: 16px; background: #fff; border-radius: 50%; top: 2px; left: 2px; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .toggle-switch { width: 36px; height: 20px; background: var(--md-outline); border-radius: 10px; position: relative; transition: background-color 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15); }
+        .toggle-switch::after { content: ''; position: absolute; width: 16px; height: 16px; background: linear-gradient(180deg, #fff 0%, #e0e0e0 100%); box-shadow: 0 1px 2px rgba(0,0,0,0.2); border-radius: 50%; top: 2px; left: 2px; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .toggle-switch.active { background: var(--md-primary); }
         .toggle-switch.active::after { transform: translateX(16px); }
-        .toc-item { padding: 16px 24px; border-bottom: 1px solid var(--md-surface-container); font-size: 14px; cursor: pointer; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -40%); background-color: var(--md-surface); width: 85%; max-width: 400px; border-radius: 16px; z-index: 260; opacity: 0; pointer-events: none; display: flex; flex-direction: column; max-height: 80vh; box-shadow: 0 10px 30px rgba(0,0,0,0.2); will-change: transform, opacity; visibility: hidden; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s; }
-        .modal.active { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, -50%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s; }
+        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -45%) scale(0.95); background-color: var(--md-surface); width: 85%; max-width: 400px; border-radius: 16px; z-index: 260; opacity: 0; pointer-events: none; display: flex; flex-direction: column; max-height: 80vh; box-shadow: 0 10px 30px rgba(0,0,0,0.2); will-change: transform, opacity; visibility: hidden; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s; }
+        .modal.active { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, -50%) scale(1); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s; }
         .modal-header { padding: 24px 24px 16px; font-size: 18px; font-weight: 700; }
         .modal-body { padding: 0 24px 24px; overflow-y: auto; font-size: 13px; line-height: 1.6; color: var(--md-on-surface-variant); }
         .modal-footer { padding: 12px 24px; text-align: right; border-top: 1px solid var(--md-surface-container); }
         .btn-text { background: none; border: none; color: var(--md-primary); font-size: 15px; font-weight: 600; padding: 8px 16px; border-radius: 20px; cursor: pointer; }
 
-        /* 热力图系统 CSS */
         .heatmap-grid { display: grid; grid-template-rows: repeat(7, 1fr); grid-auto-flow: column; gap: 4px; overflow-x: auto; padding-bottom: 8px; margin-top: 12px;}
-        .heatmap-grid::-webkit-scrollbar { height: 4px; }
-        .heatmap-grid::-webkit-scrollbar-thumb { background: var(--md-outline); border-radius: 4px; }
         .heat-cell { width: 14px; height: 14px; border-radius: 3px; transition: opacity 0.2s; }
 
         .detail-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; background: linear-gradient(to bottom, rgba(var(--dynamic-rgb), 0.1) 0%, var(--md-background) 300px), var(--md-background); z-index: 100; display: flex; flex-direction: column; transform: translateX(100vw); overflow: hidden; will-change: transform; visibility: hidden; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s; }
@@ -139,7 +184,8 @@
         
         .detail-tags-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
         .detail-tag { padding: 4px 10px; background: rgba(var(--dynamic-rgb), 0.15); color: rgb(var(--dynamic-rgb)); border-radius: 12px; font-size: 11px; font-weight: 600; display:flex; align-items:center; gap:4px; }
-        .detail-tag-add { padding: 4px 10px; background: rgba(0,0,0,0.05); color: var(--md-on-surface-variant); border-radius: 12px; font-size: 11px; cursor: pointer; display: flex; align-items: center; font-weight: 600; }
+        .detail-tag-add { padding: 4px 10px; background: rgba(0,0,0,0.05); color: var(--md-on-surface-variant); border-radius: 12px; font-size: 11px; cursor: pointer; display: flex; align-items: center; font-weight: 600; transition: background 0.2s; }
+        .detail-tag-add:active { background: rgba(0,0,0,0.1); }
         body[data-theme="dark"] .detail-tag-add { background: rgba(255,255,255,0.1); }
 
         .detail-stats-row { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 24px; padding: 20px 16px; border-top: 1px solid var(--md-outline); border-bottom: 1px solid var(--md-outline); }
@@ -149,57 +195,145 @@
         .rating-section { flex-shrink: 0; width: 100%; background-color: var(--md-surface); border-radius: 12px; padding: 24px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.02); }
         .rating-header { font-size: 15px; font-weight: 600; margin-bottom: 16px; text-align: center; color: var(--md-on-surface); position: relative;}
         
-        .md-export-btn { position: absolute; right: 0; top: 0; background: rgba(var(--dynamic-rgb), 0.1); border: none; border-radius: 12px; padding: 4px 10px; font-size: 12px; color: rgb(var(--dynamic-rgb)); font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;}
+        .md-export-btn { position: absolute; right: 0; top: 0; background: rgba(var(--dynamic-rgb), 0.1); border: none; border-radius: 12px; padding: 4px 10px; font-size: 12px; color: rgb(var(--dynamic-rgb)); font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: transform 0.2s;}
+        .md-export-btn:active { transform: scale(0.95); }
         
         .stars-container { display: flex; justify-content: center; gap: 8px; direction: rtl;}
-        .star { font-size: 32px; color: var(--md-surface-container-high); cursor: pointer; font-variation-settings: 'FILL' 1; transition: color 0.2s;}
-        .star:hover, .star:hover ~ .star, .star.active { color: #fbbc04; }
+        .star { font-size: 32px; color: var(--md-surface-container-high); cursor: pointer; font-variation-settings: 'FILL' 1; transition: color 0.2s, transform 0.2s;}
+        .star:hover, .star:hover ~ .star, .star.active { color: #fbbc04; transform: scale(1.1); }
         
         .notes-section { flex-shrink: 0; width: 100%; display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px; background: var(--md-surface-container); border-radius: 12px; padding: 16px; }
         #detail-notes-list { max-height: 40vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; overscroll-behavior: contain; }
-        #detail-notes-list::-webkit-scrollbar { width: 4px; }
-        #detail-notes-list::-webkit-scrollbar-thumb { background: var(--md-outline); border-radius: 4px; }
-        .note-card { background-color: var(--md-surface); border-left: 4px solid rgb(var(--dynamic-rgb)); padding: 12px 16px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); font-size: 13px; line-height: 1.5; cursor: pointer; border: 1px solid rgba(0,0,0,0.02); flex-shrink: 0; }
+        .note-card { background-color: var(--md-surface); border-left: 4px solid rgb(var(--dynamic-rgb)); padding: 12px 16px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); font-size: 13px; line-height: 1.5; cursor: pointer; border: 1px solid rgba(0,0,0,0.02); flex-shrink: 0; transition: transform 0.2s; }
+        .note-card:active { transform: scale(0.98); }
         
         .detail-bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; padding: 12px 20px; background-color: var(--md-surface); box-shadow: 0 -4px 12px rgba(0,0,0,0.04); display: flex; gap: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 20;}
-        .btn-secondary { flex: 1; background-color: var(--md-surface-container); border: none; border-radius: 24px; height: 48px; font-size: 15px; font-weight: 600; color: var(--md-on-surface); display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;}
-        .btn-primary { flex: 2; background-color: rgb(var(--dynamic-rgb)); border: none; border-radius: 24px; height: 48px; font-size: 16px; font-weight: 600; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer;}
-
-        .reader-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; background-color: var(--reader-bg) !important; color: var(--reader-color); z-index: 200; display: flex; flex-direction: column; transform: translateX(100vw); will-change: transform; visibility: hidden; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s; }
-        .reader-screen.active { transform: translateX(0); visibility: visible; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s; }
-        .reader-header { flex-shrink: 0; height: 60px; border-bottom: 1px solid rgba(128,128,128,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 8px; }
-        .reader-header-title { font-size: 15px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
-        .bookmark-badge { position: absolute; bottom: 60px; left: 0; background: var(--md-primary); color: var(--md-on-primary); padding: 6px 16px 6px 12px; border-radius: 0 16px 16px 0; font-size: 12px; font-weight: 600; box-shadow: 2px 2px 8px rgba(0,0,0,0.15); z-index: 250; display: none; pointer-events: none; }
-        .reader-viewport { flex: 1; overflow-y: auto; max-width: 1000px; width: 100%; margin: 0 auto; scroll-behavior: smooth; transition: font-size 0.2s, line-height 0.2s, font-family 0.2s; position: relative; padding: 0;}
-        #epub-viewer { width: 100%; height: 100%; overflow: hidden; padding: 0; box-sizing: border-box; }
         
-        .txt-content { white-space: pre-wrap; word-wrap: break-word; text-align: justify; padding-bottom: 200px; }
+        /* 拟物化按钮 */
+        .btn-primary, .btn-secondary {
+            background: linear-gradient(180deg, var(--sk-btn-top) 0%, var(--sk-btn-bottom) 100%);
+            border: 1px solid var(--sk-border);
+            box-shadow: inset 0 1px 0 var(--sk-inset), 0 2px 3px var(--sk-shadow);
+            color: var(--sk-btn-text) !important;
+            font-weight: bold !important;
+            border-radius: 24px; height: 48px; font-size: 15px; 
+            display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        body[data-theme="dark"] .btn-secondary { text-shadow: 0 -1px 0 rgba(0,0,0,0.5); }
+        
+        .btn-primary { 
+            background: linear-gradient(180deg, #0096ff 0%, #0070e0 100%); 
+            color: white !important; 
+            border: 1px solid #0050a0;
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.3);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .btn-secondary { flex: 1; } .btn-primary { flex: 2; font-size: 16px;}
+        .btn-secondary:active, .btn-primary:active { transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
+
+        /* ================= Reader 全新沉浸式架构 ================= */
+        .reader-screen { 
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; 
+            background-color: var(--reader-bg) !important; color: var(--reader-color); 
+            z-index: 200; display: block; 
+            transform: translateX(100vw); will-change: transform; visibility: hidden; 
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s; 
+        }
+        .reader-screen.active { 
+            transform: translateX(0); visibility: visible; 
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s; 
+        }
+        
+        .reader-header { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 210;
+            background-color: var(--reader-bg); border-bottom: 1px solid rgba(128,128,128,0.1); 
+            display: flex; align-items: center; justify-content: space-between; padding: 0 8px; 
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s; will-change: transform, opacity; 
+        }
+        .reader-header-title { font-size: 15px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
+        
+        .reader-footer { 
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; z-index: 210;
+            background-color: var(--reader-bg); border-top: 1px solid rgba(128,128,128,0.1); 
+            display: flex; align-items: center; justify-content: space-between; padding: 0 20px; 
+            font-size: 11px; opacity: 0.6; 
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s; will-change: transform, opacity; 
+        }
+        
+        .reader-footer::after {
+            content: ''; position: absolute; bottom: 0; left: 0; height: 2px;
+            background-color: var(--md-primary); width: var(--read-progress, 0%);
+            transition: width 0.3s ease-out; opacity: 0.8;
+        }
+
+        .reader-screen.fullscreen .reader-header { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+        .reader-screen.fullscreen .reader-footer { transform: translateY(100%); opacity: 0; pointer-events: none; }
+
+        .bookmark-badge { 
+            position: absolute; bottom: 60px; left: 0; z-index: 250;
+            background: var(--md-primary); color: var(--md-on-primary); 
+            padding: 6px 16px 6px 12px; border-radius: 0 16px 16px 0; 
+            font-size: 12px; font-weight: 600; box-shadow: 2px 2px 8px rgba(0,0,0,0.15); 
+            display: none; pointer-events: none; 
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .reader-screen.fullscreen .bookmark-badge { transform: translateY(60px); } 
+
+        .reader-viewport { 
+            width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 200;
+            overflow-y: auto; scroll-behavior: smooth; margin: 0 auto;
+        }
+
+        #reader-progress-label { display: inline-block; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), font-weight 0.2s, color 0.2s; transform-origin: left center; }
+        .reader-footer.scrolling #reader-progress-label { transform: scale(1.15); font-weight: 700; color: var(--md-primary); }
+
+        #epub-viewer { width: 100%; height: 100%; overflow: hidden; padding: 0 16px; box-sizing: border-box; max-width: 800px; margin: 0 auto; }
+        
+        .txt-content { 
+            padding: 80px 16px 60px 16px; 
+            white-space: pre-wrap; word-wrap: break-word; text-align: justify; 
+            max-width: 800px; margin: 0 auto; box-sizing: border-box;
+        }
+        .txt-content * { font-family: inherit !important; font-weight: inherit !important; }
         mark.txt-highlight { background: rgba(0, 132, 255, 0.25); color: inherit; cursor: pointer; border-radius: 2px; }
 
         #pdf-viewer { display: none; height: 100%; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px;}
-        .reader-footer { flex-shrink: 0; height: 40px; border-top: 1px solid rgba(128,128,128,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-size: 11px; opacity: 0.6; }
-
+        
         .selection-toolbar { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(150%); background: var(--md-surface); box-shadow: 0 8px 24px rgba(0,0,0,0.2); padding: 12px 16px; border-radius: 16px; z-index: 350; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; border: 1px solid var(--md-outline); opacity: 0; pointer-events: none; will-change: transform, opacity; visibility: hidden; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s; }
         .selection-toolbar.active { transform: translateX(-50%) translateY(0); opacity: 1; visibility: visible; pointer-events: auto; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s; }
         .selection-text { font-size: 13px; color: var(--md-on-surface-variant); font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 4px; }
 
-        .bottom-sheet { position: absolute; bottom: 0; left: 0; width: 100%; height: auto; border-radius: 24px 24px 0 0; background-color: var(--md-surface); z-index: 260; transform: translateY(100%); padding: 24px; box-shadow: 0 -4px 16px rgba(0,0,0,0.1); display:flex; flex-direction:column; gap:20px; will-change: transform; opacity: 0; pointer-events: none; visibility: hidden; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s; }
+        .bottom-sheet { position: absolute; bottom: 0; left: 0; width: 100%; height: auto; border-radius: 24px 24px 0 0; background: var(--md-surface); z-index: 260; transform: translateY(100%); padding: 24px; box-shadow: 0 -4px 16px rgba(0,0,0,0.1); display:flex; flex-direction:column; gap:20px; will-change: transform; opacity: 0; pointer-events: none; visibility: hidden; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s; }
         .bottom-sheet.active { transform: translateY(0); visibility: visible; opacity: 1; pointer-events: auto; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s; }
+        
         .settings-row { display: flex; align-items: center; justify-content: space-between; }
         .settings-label { font-size: 14px; font-weight: 500; color: var(--md-on-surface-variant); width: 60px; }
         .controls-group { display: flex; align-items: center; gap: 12px; background-color: var(--md-surface-container); border-radius: 24px; padding: 4px; flex: 1; justify-content: space-around;}
-        .btn-toggle { background: none; border: none; border-radius: 20px; padding: 6px 16px; font-size: 14px; font-weight: 600; color: var(--md-on-surface); cursor: pointer; transition: background 0.2s;}
+        
+        /* 设置按钮不采用重度拟物，保持清爽 */
+        .btn-toggle { background: none; border: none; border-radius: 20px; padding: 6px 16px; font-size: 14px; font-weight: 600; color: var(--md-on-surface); cursor: pointer; transition: background 0.2s, transform 0.2s;}
+        .btn-toggle:active { transform: scale(0.9); }
         .btn-toggle.active { background-color: var(--md-surface); box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: var(--md-primary);}
+        
         .theme-circle { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--md-outline); cursor: pointer; transition: transform 0.2s; }
+        .theme-circle:active { transform: scale(0.9); }
         .theme-circle.active { border: 2px solid var(--md-primary); transform: scale(1.1); }
+
+        #quote-action-preview { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
         .toast { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background-color: var(--md-on-surface); color: var(--md-surface); padding: 10px 20px; border-radius: 24px; font-size: 13px; opacity: 0; z-index: 400; transition: opacity 0.3s; text-align: center; pointer-events:none;}
         .toast.show { opacity: 1; }
         #file-input, #color-picker, #custom-font-input { display: none; }
-
-        .sync-box { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
         .sync-input { width: 100%; padding: 12px; border: 1px solid var(--md-outline); border-radius: 8px; background-color: var(--md-surface-container); color: var(--md-on-surface); font-size: 16px; text-align: center; letter-spacing: 2px; }
         .sync-code-display { font-size: 32px; font-weight: 700; color: var(--md-primary); text-align: center; letter-spacing: 4px; margin: 16px 0; }
+        
+        .toc-item { 
+            padding: 16px 24px; border-bottom: 1px solid var(--md-surface-container); 
+            font-size: 14px; cursor: pointer; display: flex; align-items: center; 
+            justify-content: flex-start; transition: background 0.2s, padding-left 0.2s; 
+        }
+        .toc-item:hover { background: var(--md-surface-container); padding-left: 32px; }
+        .toc-item::before { content: '•'; color: var(--md-primary); margin-right: 12px; font-size: 18px; line-height: 0; }
     </style>
 </head>
 <body>
@@ -207,14 +341,13 @@
 <div id="app-wrapper">
     <div id="backdrop" class="backdrop" onclick="closeOverlays()"></div>
 
-    <!-- 热力图弹窗 -->
     <div id="heatmap-modal" class="modal">
-        <div class="modal-header" data-i18n="heatmap_title">阅读热力图</div>
+        <div class="modal-header">阅读热力图</div>
         <div class="modal-body">
-            <div style="font-size:12px; color:var(--md-on-surface-variant); margin-bottom:12px;" data-i18n="heatmap_desc">记录你每一天的沉浸时光</div>
+            <div style="font-size:12px; color:var(--md-on-surface-variant); margin-bottom:12px;">记录你每一天的沉浸时光</div>
             <div id="heatmap-container" class="heatmap-grid"></div>
         </div>
-        <div class="modal-footer"><button class="btn-text" onclick="closeOverlays()" data-i18n="btn_close">关闭</button></div>
+        <div class="modal-footer"><button class="btn-text" onclick="closeOverlays()">关闭</button></div>
     </div>
 
     <div id="side-drawer" class="drawer drawer-left">
@@ -222,16 +355,17 @@
             <div class="drawer-title">
                 <span class="material-symbols-outlined" style="color: var(--md-primary); font-size: 28px; margin-right: 8px;">menu_book</span> Readlite
             </div>
-            <div class="drawer-subtitle">v0.4.2 · SyncFlow</div>
+            <div class="drawer-subtitle">v0.4.9 · SyncFlow</div>
         </div>
+        
         <div class="drawer-content">
-            <div class="category-title" data-i18n="sidebar_stats_title">阅读统计 (Stats)</div>
+            <div class="category-title">阅读统计 (Stats)</div>
             <div class="menu-item" onclick="openHeatmap()" style="cursor: pointer;">
-                <div class="menu-left"><span class="material-symbols-outlined icon" style="color: var(--md-primary);">schedule</span><span data-i18n="sidebar_today">今日有效阅读</span></div>
+                <div class="menu-left"><span class="material-symbols-outlined icon" style="color: var(--md-primary);">schedule</span><span>今日有效阅读</span></div>
                 <div style="font-weight: 700; color: var(--md-primary); font-size: 16px;" id="sidebar-today-stats">0 分钟</div>
             </div>
 
-            <div class="category-title" data-i18n="sidebar_assets_title">数据与备份 (Local Assets)</div>
+            <div class="category-title">数据与备份 (Local Assets)</div>
             <button class="menu-item" onclick="closeOverlays(); setTimeout(() => openModal('sync-modal'), 100)">
                 <div class="menu-left"><span class="material-symbols-outlined icon" style="color: var(--md-primary);">wifi_tethering</span><span style="color: var(--md-primary); font-weight: 600;">双端暗号同步</span></div>
             </button>
@@ -244,44 +378,41 @@
             <input type="file" id="import-json-input" accept=".json,.readlite" style="display:none;" onchange="importLocalBackup(event)">
             
             <button class="menu-item" style="color: #d93025;" onclick="clearCache()">
-                <div class="menu-left"><span class="material-symbols-outlined icon" style="color: #d93025;">delete_sweep</span><span data-i18n="menu_clear">清理阅读缓存</span></div>
+                <div class="menu-left"><span class="material-symbols-outlined icon" style="color: #d93025;">delete_sweep</span><span>清理阅读缓存</span></div>
             </button>
 
-            <div class="category-title" data-i18n="sidebar_display_title">布局与辅助 (Display)</div>
+            <div class="category-title">布局与辅助 (Display)</div>
             <div class="menu-item" onclick="toggleAuroraSetting('doublePage')">
-                <div class="menu-left"><span class="material-symbols-outlined icon">menu_book</span><span data-i18n="menu_double_page">响应式双页模式</span></div>
+                <div class="menu-left"><span class="material-symbols-outlined icon">menu_book</span><span>响应式双页模式</span></div>
                 <div id="toggle-doublePage" class="toggle-switch active"></div>
             </div>
             <div class="menu-item" onclick="toggleAuroraSetting('timeEst')">
-                <div class="menu-left"><span class="material-symbols-outlined icon">bookmark</span><span data-i18n="menu_time_est">左下角时间书签</span></div>
+                <div class="menu-left"><span class="material-symbols-outlined icon">bookmark</span><span>左下角时间书签</span></div>
                 <div id="toggle-timeEst" class="toggle-switch active"></div>
             </div>
             <div class="menu-item" style="cursor: default;">
-                <div class="menu-left"><span class="material-symbols-outlined icon">palette</span><span data-i18n="sheet_bg">背景主题</span></div>
+                <div class="menu-left"><span class="material-symbols-outlined icon">palette</span><span>屏显模式</span></div>
                 <div style="display: flex; gap: 8px;">
-                    <div class="theme-circle" style="background:#faf9f7; width:22px; height:22px;" onclick="setTheme('light')"></div>
-                    <div class="theme-circle" style="background:#fdf6e3; border-color:#a38d7a; width:22px; height:22px;" onclick="setTheme('sepia')"></div>
-                    <div class="theme-circle" style="background:#1a1a1a; border-color:#555; width:22px; height:22px;" onclick="setTheme('dark')"></div>
-                    <div class="theme-circle" style="background:#ffffff; border-color:#000; width:22px; height:22px;" onclick="setTheme('eink')"></div>
+                    <div class="theme-circle" title="LCD模式" style="background:#faf9f7; width:22px; height:22px;" onclick="setTheme('light')"></div>
+                    <div class="theme-circle" title="护眼模式" style="background:#fdf6e3; border-color:#a38d7a; width:22px; height:22px;" onclick="setTheme('sepia')"></div>
+                    <div class="theme-circle" title="OLED纯黑模式" style="background:#000000; border-color:#555; width:22px; height:22px;" onclick="setTheme('dark')"></div>
+                    <div class="theme-circle" title="墨水屏模式" style="background:#ffffff; border-color:#000; width:22px; height:22px;" onclick="setTheme('eink')"></div>
                 </div>
             </div>
 
-            <div class="category-title" data-i18n="sidebar_sys_title">系统支持 (System)</div>
+            <div class="category-title">系统支持 (System)</div>
             <div class="menu-item" onclick="installPWA()" style="display: flex;">
-                <div class="menu-left"><span class="material-symbols-outlined icon" style="color:var(--md-primary)">install_mobile</span><span data-i18n="menu_install" style="color:var(--md-primary); font-weight: 500;">安装到桌面</span></div>
-            </div>
-            <div class="menu-item" onclick="toggleLanguage()">
-                <div class="menu-left"><span class="material-symbols-outlined icon">translate</span><span data-i18n="menu_lang" style="font-weight: 500; color: var(--md-primary);">🌐 语言：中文</span></div>
+                <div class="menu-left"><span class="material-symbols-outlined icon" style="color:var(--md-primary)">install_mobile</span><span style="color:var(--md-primary); font-weight: 500;">安装到桌面</span></div>
             </div>
             <div class="menu-item" onclick="openModal('changelog-modal')">
-                <div class="menu-left"><span class="material-symbols-outlined icon">update</span><span data-i18n="menu_changelog">更新日志</span></div>
+                <div class="menu-left"><span class="material-symbols-outlined icon">update</span><span>更新日志</span></div>
             </div>
         </div>
     </div>
 
     <div id="toc-drawer" class="drawer drawer-right" style="z-index: 320;">
         <div class="drawer-header" style="padding: 20px 24px 16px;">
-            <div class="drawer-title" style="font-size:18px;" data-i18n="reader_toc">目录 (TOC)</div>
+            <div class="drawer-title" style="font-size:18px;">目录 (TOC)</div>
         </div>
         <div class="drawer-content" id="toc-list" style="padding:0;"></div>
     </div>
@@ -306,21 +437,24 @@
                 <div style="font-size: 11px; color: var(--md-outline); margin-top: 8px;" id="sync-status-receiver"></div>
             </div>
         </div>
-        <div class="modal-footer"><button class="btn-text" onclick="closeSyncModal()" data-i18n="btn_close">关闭</button></div>
+        <div class="modal-footer"><button class="btn-text" onclick="closeSyncModal()">关闭</button></div>
     </div>
 
     <div id="changelog-modal" class="modal">
-        <div class="modal-header" data-i18n="menu_changelog">更新日志</div>
+        <div class="modal-header">更新日志</div>
         <div class="modal-body">
-            <div style="font-weight: 700; color: var(--md-primary); margin-bottom: 4px;">v0.4.2 · SyncFlow</div>
-            - 私人量化热力图：点击侧边栏阅读时间，解锁 GitHub 风格的过去 84 天阅读热力图。<br>
-            - 交互进化：底部 Tab 激活时新增原生图标填充过渡动画，解决书单切换列表闪烁 Bug。<br>
-            - 排版修复：修正了黑体与宋体切换时的模糊匹配逻辑错误。<br><br>
-
-            <div style="font-weight: 700; color: var(--md-on-surface-variant); margin-bottom: 4px;">v0.4.1 宇宙</div>
-            - 利用 Canvas 原生引擎实现封面动态色彩萃取；新增闪念漫游瀑布流与轻量标签胶囊体系。<br><br>
+            <div style="font-weight: 700; color: var(--md-primary); margin-bottom: 4px;">v0.4.9 · SyncFlow (终极拟物版)</div>
+            - 🎨 全局拟物化：深度还原 iOS 6 经典刻印、高光与金属质感，触摸反馈极佳。<br>
+            - 💻 双页自适应：完美修复电脑端双页阅读，支持随窗口大小智能无缝切换单/双页，滚轮丝滑翻页。<br>
+            - 🚫 纯净视界：彻底隐藏全局滚动条，让界面回归纯粹。<br>
+            - 🐛 稳定增强：保留全部文案，修复切换 Tab 时的 UI 闪烁问题。<br><br>
+            <div style="font-weight: 700; color: var(--md-on-surface-variant); margin-bottom: 4px;">v0.4.x · 演进纪要</div>
+            - 0.4.8：重构底层动画，彻底修复各类闪烁与白边；重做PWA图标。<br>
+            - 0.4.5：增加黄金间距与段落重排补偿。<br>
+            - 0.4.3：引入纯粹呼吸式全屏与双击唤醒机制。<br>
+            - 0.4.0：引入P2P局域网暗号互传与军事级加密备份。<br>
         </div>
-        <div class="modal-footer"><button class="btn-text" onclick="closeOverlays()" data-i18n="btn_close">关闭</button></div>
+        <div class="modal-footer"><button class="btn-text" onclick="closeOverlays()">关闭</button></div>
     </div>
 
     <header class="app-bar">
@@ -338,26 +472,31 @@
     <div class="search-container">
         <div class="search-box">
             <span class="material-symbols-outlined" style="color:var(--md-on-surface-variant); margin-right:8px;">search</span>
-            <input type="text" id="search-input" data-i18n-placeholder="search_ph" placeholder="搜索书名..." oninput="handleSearch()">
+            <input type="text" id="search-input" placeholder="搜索书名..." oninput="handleSearch()">
         </div>
     </div>
 
-    <main class="main-content" id="main-content-scroll">
+    <main class="main-content" id="main-content-scroll" style="padding-top: 8px;">
         <div id="tags-filter-bar" class="tags-filter-bar" style="display: none;"></div>
         
         <div id="bookshelf" class="bookshelf-grid"></div>
         <div id="quotes-feed" class="quotes-feed" style="display: none;"></div>
         
+        <div id="zen-view" class="zen-view" style="display: none;">
+            <div id="zen-content"></div>
+        </div>
+
         <div id="empty-view" style="display: none; text-align:center; padding: 60px 20px; color:var(--md-outline);">
             <span class="material-symbols-outlined" style="font-size:64px; opacity:0.5;">menu_book</span>
-            <div style="margin-top:16px; font-size:14px;" id="empty-text" data-i18n="empty_all">空空如也</div>
+            <div style="margin-top:16px; font-size:14px;" id="empty-text">空空如也</div>
         </div>
     </main>
 
     <nav class="bottom-nav">
-        <button class="nav-item active" id="nav-all" onclick="switchTab('all')"><span class="material-symbols-outlined icon">auto_awesome_mosaic</span><span class="label" data-i18n="nav_all">全部</span></button>
-        <button class="nav-item" id="nav-favorites" onclick="switchTab('favorites')"><span class="material-symbols-outlined icon">star</span><span class="label" data-i18n="nav_fav">收藏</span></button>
-        <button class="nav-item" id="nav-quotes" onclick="switchTab('quotes')"><span class="material-symbols-outlined icon">format_quote</span><span class="label" data-i18n="nav_quotes">摘录</span></button>
+        <button class="nav-item active" id="nav-all" onclick="switchTab('all')"><span class="material-symbols-outlined icon">auto_awesome_mosaic</span><span class="label">全部</span></button>
+        <button class="nav-item" id="nav-favorites" onclick="switchTab('favorites')"><span class="material-symbols-outlined icon">star</span><span class="label">收藏</span></button>
+        <button class="nav-item" id="nav-quotes" onclick="switchTab('quotes')"><span class="material-symbols-outlined icon">format_quote</span><span class="label">摘录</span></button>
+        <button class="nav-item" id="nav-discover" onclick="switchTab('discover')"><span class="material-symbols-outlined icon">explore</span><span class="label">发现</span></button>
     </nav>
     <button class="fab" onclick="document.getElementById('file-input').click()"><span class="material-symbols-outlined" style="font-size: 28px;">add</span></button>
     <input type="file" id="file-input" accept=".txt,.epub,.pdf" onchange="handleFileImport(event)">
@@ -381,14 +520,14 @@
             </div>
             
             <div class="detail-stats-row">
-                <div class="detail-stat"><span class="detail-stat-val" id="detail-stat-prog">0%</span><span class="detail-stat-label" data-i18n="detail_prog">进度</span></div>
-                <div class="detail-stat"><span class="detail-stat-val" id="detail-stat-type">TXT</span><span class="detail-stat-label" data-i18n="detail_type">格式</span></div>
-                <div class="detail-stat"><span class="detail-stat-val" id="detail-stat-date" style="font-size: 14px;">今日</span><span class="detail-stat-label" data-i18n="detail_date">入库</span></div>
+                <div class="detail-stat"><span class="detail-stat-val" id="detail-stat-prog">0%</span><span class="detail-stat-label">进度</span></div>
+                <div class="detail-stat"><span class="detail-stat-val" id="detail-stat-type">TXT</span><span class="detail-stat-label">格式</span></div>
+                <div class="detail-stat"><span class="detail-stat-val" id="detail-stat-date" style="font-size: 14px;">今日</span><span class="detail-stat-label">入库</span></div>
             </div>
 
             <div class="rating-section">
                 <div class="rating-header">
-                    <span data-i18n="detail_rating">阅读评价</span>
+                    <span>阅读评价</span>
                     <button class="md-export-btn" onclick="exportMarkdown()"><span class="material-symbols-outlined" style="font-size: 16px;">markdown</span>导出 MD</button>
                 </div>
                 <div class="stars-container" id="stars-container">
@@ -401,20 +540,26 @@
             </div>
 
             <div class="notes-section" id="detail-notes-section" style="display:none;">
-                <div class="rating-header" style="font-size: 14px;" data-i18n="detail_notes">笔记与书签</div>
+                <div class="rating-header" style="font-size: 14px;">笔记与书签</div>
                 <div id="detail-notes-list"></div>
             </div>
         </div>
         
         <div class="detail-bottom-bar">
-            <button class="btn-secondary" id="detail-fav-btn" onclick="toggleFavFromDetail()"><span class="material-symbols-outlined" id="detail-fav-icon" style="color: rgb(var(--dynamic-rgb));">bookmark_border</span> <span data-i18n="nav_fav">收藏</span></button>
-            <button class="btn-primary" id="detail-read-btn" onclick="enterReader()"><span data-i18n="read_start">开始阅读</span></button>
+            <button class="btn-secondary" id="detail-fav-btn" onclick="toggleFavFromDetail()"><span class="material-symbols-outlined" id="detail-fav-icon" style="color: rgb(var(--dynamic-rgb));">bookmark_border</span> <span>收藏</span></button>
+            <button class="btn-primary" id="detail-read-btn" onclick="enterReader()"><span>开始阅读</span></button>
         </div>
     </div>
     <input type="color" id="color-picker" onchange="handleColorChange(event)">
 
     <div id="reader-container" class="reader-screen">
-        <div class="reader-header">
+        <div class="reader-viewport" id="viewport-wrapper">
+            <div id="txt-viewer" class="txt-content" style="display: none;"></div>
+            <div id="epub-viewer" style="display: none;"></div>
+            <div id="pdf-viewer"></div>
+        </div>
+
+        <div class="reader-header" id="reader-header">
             <div style="display:flex; align-items:center;">
                 <button class="icon-btn" onclick="closeReader()"><span class="material-symbols-outlined">arrow_back</span></button>
                 <div id="reader-title" class="reader-header-title">阅读中</div>
@@ -426,30 +571,24 @@
             </div>
         </div>
 
-        <div class="reader-viewport" id="viewport-wrapper">
-            <div id="txt-viewer" class="txt-content" style="display: none;"></div>
-            <div id="epub-viewer" style="display: none;"></div>
-            <div id="pdf-viewer"></div>
-        </div>
-        
         <div id="selection-toolbar" class="selection-toolbar">
             <div class="selection-text" id="selection-text-preview"></div>
-            <div style="display: flex; gap: 12px; margin-top: 4px;">
-                <button class="btn-primary" style="flex: 2; height: 36px; font-size: 14px; border-radius: 8px;" onclick="saveHighlight()">🖍️ 保存划线</button>
+            <div style="display: flex; gap: 8px; margin-top: 4px;">
+                <button class="btn-primary" style="flex: 2; height: 36px; font-size: 14px; border-radius: 8px;" onclick="saveHighlight()">🖍️ 划线并保存</button>
                 <button class="btn-secondary" style="flex: 1; height: 36px; font-size: 14px; border-radius: 8px;" onclick="clearSelectionUI()">取消</button>
             </div>
         </div>
 
         <div id="time-estimate-badge" class="bookmark-badge">⏳ 剩余 12 分钟</div>
 
-        <div class="reader-footer">
+        <div class="reader-footer" id="reader-footer">
             <span id="reader-progress-label">0.0%</span><span id="reader-clock">00:00</span>
         </div>
     </div>
 
     <div id="reader-settings" class="bottom-sheet" style="z-index: 320;">
         <div class="settings-row">
-            <span class="settings-label" data-i18n="sheet_font">字号</span>
+            <span class="settings-label">字号</span>
             <div class="controls-group">
                 <button class="btn-toggle" onclick="adjustFontSize(-2)">A-</button>
                 <span id="font-size-display" style="font-weight:600; font-size: 15px;">18</span>
@@ -457,7 +596,7 @@
             </div>
         </div>
         <div class="settings-row">
-            <span class="settings-label" data-i18n="sheet_lh">间距</span>
+            <span class="settings-label">间距</span>
             <div class="controls-group">
                 <button class="btn-toggle" id="lh-1" onclick="setLineHeight(1.5)">紧凑</button>
                 <button class="btn-toggle" id="lh-2" onclick="setLineHeight(1.8)">标准</button>
@@ -465,7 +604,15 @@
             </div>
         </div>
         <div class="settings-row">
-            <span class="settings-label" data-i18n="sheet_ff">字体</span>
+            <span class="settings-label">字重</span>
+            <div class="controls-group">
+                <button class="btn-toggle" id="fw-1" onclick="setFontWeight('300')">细</button>
+                <button class="btn-toggle" id="fw-2" onclick="setFontWeight('400')">标准</button>
+                <button class="btn-toggle" id="fw-3" onclick="setFontWeight('700')">粗</button>
+            </div>
+        </div>
+        <div class="settings-row" style="margin-top: 4px;">
+            <span class="settings-label">字体</span>
             <div class="controls-group">
                 <button class="btn-toggle" id="ff-1" onclick="setFontFamily('sans-serif')">黑体</button>
                 <button class="btn-toggle" id="ff-2" onclick="setFontFamily('serif')">宋体</button>
@@ -473,14 +620,23 @@
                 <input type="file" id="custom-font-input" accept=".ttf,.woff,.otf" onchange="handleCustomFont(event)">
             </div>
         </div>
-        <div class="settings-row" style="margin-top: 8px;">
-            <span class="settings-label" data-i18n="sheet_bg">背景</span>
-            <div style="display: flex; gap: 16px; flex:1; justify-content: flex-end;">
-                <div class="theme-circle" style="background:#faf9f7;" onclick="setTheme('light')"></div>
-                <div class="theme-circle" style="background:#fdf6e3; border-color:#a38d7a;" onclick="setTheme('sepia')"></div>
-                <div class="theme-circle" style="background:#1a1a1a; border-color:#555;" onclick="setTheme('dark')"></div>
-                <div class="theme-circle" style="background:#ffffff; border-color:#000;" onclick="setTheme('eink')"></div>
-            </div>
+    </div>
+
+    <div id="quote-action-sheet" class="bottom-sheet" style="z-index: 360; padding: 32px 24px calc(24px + env(safe-area-inset-bottom));">
+        <div style="font-size: 18px; font-weight: 800; color: var(--md-on-surface); margin-bottom: 16px; text-align: center;">划线与笔记</div>
+        <div style="background: var(--md-surface-container); border-radius: 16px; padding: 16px; margin-bottom: 24px; border-left: 4px solid var(--md-primary); box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);">
+            <div style="font-size: 15px; color: var(--md-on-surface); font-style: italic; line-height: 1.6;" id="quote-action-preview"></div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            <button class="btn-primary" style="height: 56px; font-size: 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(var(--md-primary-rgb), 0.2);" onclick="executeQuoteAction('trace')">
+                <span class="material-symbols-outlined" style="font-size:22px; margin-right:8px; vertical-align:-5px;">menu_book</span>回到原文溯源
+            </button>
+            <button class="btn-secondary" style="height: 56px; font-size: 16px; border-radius: 16px; background: rgba(var(--md-primary-rgb), 0.1); color: var(--md-primary); border: none;" onclick="executeQuoteAction('card')">
+                <span class="material-symbols-outlined" style="font-size:22px; margin-right:8px; vertical-align:-5px;">photo_camera</span>生成精美卡片
+            </button>
+            <button class="btn-secondary" style="height: 56px; font-size: 16px; border-radius: 16px; color: #d93025; background: rgba(217,48,37,0.08); border: none;" onclick="executeQuoteAction('delete')">
+                <span class="material-symbols-outlined" style="font-size:22px; margin-right:8px; vertical-align:-5px;">delete_outline</span>删除此条记录
+            </button>
         </div>
     </div>
 
@@ -488,33 +644,9 @@
 </div>
 
 <script>
-    const translations = {
-        "zh": { 
-            "menu_lang": "🌐 语言: 中文", "menu_changelog": "更新日志", "menu_install": "安装到桌面", "menu_clear": "清理阅读缓存", "btn_close": "关闭", "search_ph": "搜索书名...", "empty_all": "书架空空如也，点击加号导入", "empty_fav": "还没有收藏任何书籍", "empty_quotes": "还没有任何摘录与划线", "nav_all": "全部", "nav_fav": "收藏", "nav_quotes": "摘录", "detail_prog": "进度", "read_start": "开始阅读", "read_cont": "继续阅读", "read_again": "重新阅读", "sheet_font": "字号", "sheet_lh": "间距", "sheet_ff": "字体", "sheet_bg": "背景", "reader_toc": "目录 (TOC)", "prompt_note": "请输入批注内容 (留空仅添加书签)：", "detail_author": "本地文件", "detail_type": "格式", "detail_date": "入库", "detail_rating": "阅读评价", "detail_notes": "批注与划线",
-            "sidebar_stats_title": "阅读统计 (Stats)", "sidebar_today": "今日有效阅读", "sidebar_assets_title": "数据与备份 (Local Assets)", "menu_export": "导出全量数据", "menu_import": "恢复本地数据", "sidebar_display_title": "布局与主题 (Display)", "menu_double_page": "响应式双页模式", "menu_time_est": "左下角时间书签", "sidebar_sys_title": "系统支持 (System)", "time_min": " 分钟", "badge_left": "⏳ 本章剩余: 约 ", "badge_calc": "⏳ 计算中...",
-            "sort_recent": "排序: 最近阅读", "sort_progress": "排序: 阅读进度", "sort_title": "排序: 首字母", "ios_install": "iOS: 请点击下方分享按钮，选择「添加到主屏幕」", "pwa_fallback": "请通过浏览器菜单「添加到主屏幕」或部署至网站", "add_tag_prompt": "输入新标签名称 (例如: 科幻)：", "heatmap_title": "阅读热力图", "heatmap_desc": "记录你每一天的沉浸时光"
-        },
-        "en": { 
-            "menu_lang": "🌐 Lang: English", "menu_changelog": "Changelog", "menu_install": "Install App", "menu_clear": "Clear Cache", "btn_close": "Close", "search_ph": "Search books...", "empty_all": "Bookshelf is empty. Tap +", "empty_fav": "No favorite books.", "empty_quotes": "No highlights yet.", "nav_all": "All", "nav_fav": "Favorites", "nav_quotes": "Quotes", "detail_prog": "Progress", "read_start": "Start Reading", "read_cont": "Continue", "read_again": "Read Again", "sheet_font": "Size", "sheet_lh": "Spacing", "sheet_ff": "Font", "sheet_bg": "Theme", "reader_toc": "Table of Contents", "prompt_note": "Enter note (blank for bookmark):", "detail_author": "Local File", "detail_type": "Format", "detail_date": "Added", "detail_rating": "Rating", "detail_notes": "Highlights & Notes",
-            "sidebar_stats_title": "Reading Stats", "sidebar_today": "Today's Reading", "sidebar_assets_title": "Local Assets", "menu_export": "Export Backup", "menu_import": "Restore Backup", "sidebar_display_title": "Display & Theme", "menu_double_page": "Dual Page Mode", "menu_time_est": "Time Bookmark", "sidebar_sys_title": "System", "time_min": " min", "badge_left": "⏳ Est. time left: ~", "badge_calc": "⏳ Calculating...",
-            "sort_recent": "Sort: Recent", "sort_progress": "Sort: Progress", "sort_title": "Sort: Title", "ios_install": "iOS: Tap Share -> Add to Home Screen", "pwa_fallback": "Please use browser menu to Add to Home Screen", "add_tag_prompt": "Enter new tag (e.g. Sci-Fi):", "heatmap_title": "Reading Heatmap", "heatmap_desc": "Track your immersive reading time daily"
-        },
-        "ja": { 
-            "menu_lang": "🌐 言語: 日本語", "menu_changelog": "更新履歴", "menu_install": "アプリをインストール", "menu_clear": "キャッシュクリア", "btn_close": "閉じる", "search_ph": "本を検索...", "empty_all": "本棚は空です。+で追加", "empty_fav": "お気に入りの本はありません", "empty_quotes": "ハイライトはまだありません", "nav_all": "すべて", "nav_fav": "お気に入り", "nav_quotes": "引用", "detail_prog": "進捗", "read_start": "読み始める", "read_cont": "続きを読む", "read_again": "もう一度読む", "sheet_font": "文字サイズ", "sheet_lh": "行間", "sheet_ff": "フォント", "sheet_bg": "テーマ", "reader_toc": "目次 (TOC)", "prompt_note": "メモを入力 (空でしおりのみ):", "detail_author": "ローカル", "detail_type": "形式", "detail_date": "追加日", "detail_rating": "評価", "detail_notes": "ハイライトとメモ",
-            "sidebar_stats_title": "読書統計", "sidebar_today": "本日の読書", "sidebar_assets_title": "データ", "menu_export": "全データエクスポート", "menu_import": "データの復元", "sidebar_display_title": "表示とテーマ", "menu_double_page": "見開き表示モード", "menu_time_est": "残り時間ブックマーク", "sidebar_sys_title": "システム", "time_min": " 分", "badge_left": "⏳ 章の残り: 約 ", "badge_calc": "⏳ 計算中...",
-            "sort_recent": "並べ替え: 最近", "sort_progress": "並べ替え: 進捗", "sort_title": "並べ替え: タイトル", "ios_install": "iOS: 共有 -> ホーム画面に追加", "pwa_fallback": "ブラウザのメニューからホーム画面に追加してください", "add_tag_prompt": "新しいタグを入力:", "heatmap_title": "読書ヒートマップ", "heatmap_desc": "毎日の読書時間を記録します"
-        },
-        "ko": { 
-            "menu_lang": "🌐 언어: 한국어", "menu_changelog": "업데이트 기록", "menu_install": "앱 설치", "menu_clear": "캐시 지우기", "btn_close": "닫기", "search_ph": "책 검색...", "empty_all": "책장이 비어 있습니다. +로 추가", "empty_fav": "즐겨찾는 책이 없습니다", "empty_quotes": "하이라이트가 없습니다.", "nav_all": "전체", "nav_fav": "즐겨찾기", "nav_quotes": "인용문", "detail_prog": "진행률", "read_start": "읽기 시작", "read_cont": "계속 읽기", "read_again": "다시 읽기", "sheet_font": "글꼴 크기", "sheet_lh": "줄 간격", "sheet_ff": "글꼴", "sheet_bg": "테마", "reader_toc": "목차 (TOC)", "prompt_note": "메모 입력 (비워두면 책갈피만):", "detail_author": "로컬 파일", "detail_type": "형식", "detail_date": "추가됨", "detail_rating": "평가", "detail_notes": "하이라이트 및 메모",
-            "sidebar_stats_title": "독서 통계", "sidebar_today": "오늘의 독서", "sidebar_assets_title": "데이터", "menu_export": "데이터 내보내기", "menu_import": "데이터 복원", "sidebar_display_title": "화면 및 테마", "menu_double_page": "두 페이지 모드", "menu_time_est": "남은 시간 책갈피", "sidebar_sys_title": "시스템", "time_min": " 분", "badge_left": "⏳ 남은 시간: 약 ", "badge_calc": "⏳ 계산 중...",
-            "sort_recent": "정렬: 최근", "sort_progress": "정렬: 진행률", "sort_title": "정렬: 제목", "ios_install": "iOS: 공유 -> 홈 화면에 추가", "pwa_fallback": "브라우저 메뉴에서 홈 화면에 추가를 선택하세요", "add_tag_prompt": "새 태그 입력:", "heatmap_title": "독서 히트맵", "heatmap_desc": "매일의 독서 시간을 기록합니다"
-        }
-    };
-    const supportedLangs = ['zh', 'en', 'ja', 'ko'];
-
     let db, activeBookId = null, currentDetailBookId = null, epubBookInstance = null, epubRendition = null;
-    let currentTab = 'all', viewMode = 'grid', searchQuery = '', currentToc = [], searchTimeout;
-    let sortMode = 'recent', activeTag = null; 
+    let currentTab = 'all', viewMode = 'grid', currentToc = [];
+    let sortMode = 'recent', activeTag = null, searchQuery = '', searchTimeout; 
     let currentSelectionInfo = null; 
     let customFontBase64 = localStorage.getItem('readlite_custom_font') || null;
     let peer = null, syncConn = null;
@@ -522,28 +654,31 @@
     const defaultColors = ['0, 132, 255', '0, 106, 96', '140, 29, 24', '75, 0, 130', '184, 66, 15'];
 
     let currentTheme = localStorage.getItem('readlite_theme') || 'light';
-    let currentLang = localStorage.getItem('readlite_lang') || 'zh';
-    if (!supportedLangs.includes(currentLang)) currentLang = 'zh';
-
     let currentFontSize = parseInt(localStorage.getItem('readlite_fontsize') || '18');
     let currentLineHeight = parseFloat(localStorage.getItem('readlite_lh') || '1.8');
     let currentFontFamily = localStorage.getItem('readlite_ff') || 'sans-serif';
+    let currentFontWeight = localStorage.getItem('readlite_fw') || '400';
 
     let auroraPrefs = { doublePage: true, timeEst: true };
     let todayMinutes = 0;
     let deferredPrompt;
+    
+    let lastScrollY = 0;
+    let readerScrollTimeout;
+    let hideTimer = null;
+    let lastTouchTime = 0;
+    let currentBookContext = { type: 'txt', totalMins: 0 };
+    let epubWheelTimeout = null;
+    let activeQuoteContext = { bookId: null, cfi: null, text: null };
 
     function initApp() {
-        applyLanguage(); setTheme(currentTheme); 
+        setTheme(currentTheme); 
         loadCustomFontIfAny(); updateTypographyUI();
+        generatePWAIcon(); 
         
-        // 迁移/初始化 热力图数据历史
         const todayStr = new Date().toISOString().slice(0,10);
         let historyObj = JSON.parse(localStorage.getItem('rl_history') || '{}');
-        if (!historyObj[todayStr] && localStorage.getItem('rl_mins')) {
-            historyObj[todayStr] = parseInt(localStorage.getItem('rl_mins'));
-            localStorage.setItem('rl_history', JSON.stringify(historyObj));
-        }
+        if (!historyObj[todayStr] && localStorage.getItem('rl_mins')) { historyObj[todayStr] = parseInt(localStorage.getItem('rl_mins')); localStorage.setItem('rl_history', JSON.stringify(historyObj)); }
         todayMinutes = historyObj[todayStr] || 0;
 
         const req = indexedDB.open('ReadliteDB', 4);
@@ -555,11 +690,43 @@
         if(localStorage.getItem('rl_prefs')) auroraPrefs = JSON.parse(localStorage.getItem('rl_prefs'));
         updateAuroraToggleUI(); refreshStatsUI(); setInterval(statsEngine, 60000); initKeyboardManager();
         
-        document.getElementById('viewport-wrapper').addEventListener('click', (e) => {
-            if (!e.target.closest('#selection-toolbar') && !e.target.closest('.txt-highlight')) {
-                const sel = window.getSelection();
-                if (!sel || sel.isCollapsed) clearSelectionUI();
+        const vpWrapper = document.getElementById('viewport-wrapper');
+        
+        vpWrapper.addEventListener('click', (e) => {
+            if (e.target.closest('#selection-toolbar') || e.target.closest('.txt-highlight')) {
+                const sel = window.getSelection(); if (!sel || sel.isCollapsed) clearSelectionUI(); return;
+            } else {
+                const sel = window.getSelection(); if (!sel || sel.isCollapsed) clearSelectionUI();
             }
+
+            const now = Date.now();
+            if (now - lastTouchTime < 300) { 
+                const container = document.getElementById('reader-container');
+                container.classList.toggle('fullscreen');
+                clearTimeout(hideTimer); hideTimer = null;
+            }
+            lastTouchTime = now;
+        });
+
+        vpWrapper.addEventListener('scroll', (e) => {
+            if (!activeBookId) return;
+            const currentY = e.target.scrollTop;
+            const container = document.getElementById('reader-container');
+            const footer = document.getElementById('reader-footer');
+            
+            footer.classList.add('scrolling');
+            clearTimeout(readerScrollTimeout);
+            readerScrollTimeout = setTimeout(() => { footer.classList.remove('scrolling'); }, 200);
+
+            if (currentY > 50 && currentY > lastScrollY) { 
+                if (!container.classList.contains('fullscreen') && !hideTimer) {
+                    hideTimer = setTimeout(() => { container.classList.add('fullscreen'); hideTimer = null; }, 3000);
+                }
+            } else if (currentY < lastScrollY - 10) {
+                container.classList.remove('fullscreen');
+                clearTimeout(hideTimer); hideTimer = null;
+            }
+            lastScrollY = currentY;
         });
 
         document.addEventListener('selectionchange', () => {
@@ -570,16 +737,11 @@
                     if (sel && !sel.isCollapsed && txtViewer.contains(sel.anchorNode)) {
                         const text = sel.toString().trim();
                         if (text.length > 0) {
-                            const range = sel.getRangeAt(0);
-                            const preCaretRange = range.cloneRange();
-                            preCaretRange.selectNodeContents(txtViewer);
-                            preCaretRange.setEnd(range.startContainer, range.startOffset);
-                            const start = preCaretRange.toString().length;
-                            const end = start + text.length;
-
+                            const range = sel.getRangeAt(0); const preCaretRange = range.cloneRange();
+                            preCaretRange.selectNodeContents(txtViewer); preCaretRange.setEnd(range.startContainer, range.startOffset);
+                            const start = preCaretRange.toString().length; const end = start + text.length;
                             currentSelectionInfo = { type: 'txt', cfiRange: `txt-${start}-${end}`, start, end, text };
-                            document.getElementById('selection-text-preview').innerText = text;
-                            document.getElementById('selection-toolbar').classList.add('active');
+                            document.getElementById('selection-text-preview').innerText = text; document.getElementById('selection-toolbar').classList.add('active');
                         }
                     } else document.getElementById('selection-toolbar').classList.remove('active');
                 }, 100);
@@ -587,42 +749,46 @@
         });
 
         document.getElementById('txt-viewer').addEventListener('click', (e) => {
-            let mark = e.target.closest('mark.txt-highlight');
-            if (mark && confirm("确认删除这条划线记录吗？")) window.removeNoteFromDBByCfi(mark.dataset.cfi);
+            let mark = e.target.closest('mark.txt-highlight'); if (mark && confirm("确认删除这条划线记录吗？")) window.removeNoteFromDBByCfi(mark.dataset.cfi);
         });
+    }
+
+    function generatePWAIcon() {
+        const canvas = document.createElement('canvas'); canvas.width = 192; canvas.height = 192; const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#0084ff'; ctx.beginPath(); ctx.roundRect(0, 0, 192, 192, 38.4); ctx.fill();
+        ctx.font = '96px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('📖', 96, 96);
+        const pngData = canvas.toDataURL('image/png');
+        let link = document.querySelector('link[rel="apple-touch-icon"]');
+        if(!link) { link = document.createElement('link'); link.rel = 'apple-touch-icon'; document.head.appendChild(link); }
+        link.href = pngData;
     }
 
     window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; });
     function installPWA() {
         if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { deferredPrompt = null; closeOverlays(); }); } 
-        else { const isIos = /ipad|iphone|ipod/.test(navigator.userAgent.toLowerCase()); if (isIos) showToast(t('ios_install')); else showToast(t('pwa_fallback')); }
+        else { showToast("请通过浏览器菜单「添加到主屏幕」"); }
     }
 
     function initKeyboardManager() {
         document.addEventListener('keydown', (e) => {
             if (!document.getElementById('reader-container').classList.contains('active')) return;
             switch(e.code) {
-                case 'Space': case 'ArrowRight': case 'PageDown':
-                    e.preventDefault(); if (epubRendition) epubRendition.next(); else document.getElementById('viewport-wrapper').scrollTop += window.innerHeight * 0.8; break;
-                case 'ArrowLeft': case 'PageUp':
-                    e.preventDefault(); if (epubRendition) epubRendition.prev(); else document.getElementById('viewport-wrapper').scrollTop -= window.innerHeight * 0.8; break;
+                case 'Space': case 'ArrowRight': case 'PageDown': e.preventDefault(); if (epubRendition) epubRendition.next(); else document.getElementById('viewport-wrapper').scrollTop += window.innerHeight * 0.8; break;
+                case 'ArrowLeft': case 'PageUp': e.preventDefault(); if (epubRendition) epubRendition.prev(); else document.getElementById('viewport-wrapper').scrollTop -= window.innerHeight * 0.8; break;
                 case 'Escape': e.preventDefault(); closeReader(); break;
             }
         });
     }
 
-    // 引擎更新：记录每日独立时长
     function statsEngine() { 
         if (document.visibilityState === 'visible') { 
-            todayMinutes++; 
-            const todayStr = new Date().toISOString().slice(0,10);
+            todayMinutes++; const todayStr = new Date().toISOString().slice(0,10);
             let historyObj = JSON.parse(localStorage.getItem('rl_history') || '{}');
-            historyObj[todayStr] = todayMinutes;
-            localStorage.setItem('rl_history', JSON.stringify(historyObj));
+            historyObj[todayStr] = todayMinutes; localStorage.setItem('rl_history', JSON.stringify(historyObj));
             refreshStatsUI(); 
         } 
     }
-    function refreshStatsUI() { const timeStr = todayMinutes + t('time_min'); document.getElementById('sidebar-today-stats').innerText = timeStr; }
+    function refreshStatsUI() { const timeStr = todayMinutes + " 分钟"; document.getElementById('sidebar-today-stats').innerText = timeStr; }
 
     function toggleAuroraSetting(key) {
         auroraPrefs[key] = !auroraPrefs[key]; localStorage.setItem('rl_prefs', JSON.stringify(auroraPrefs)); updateAuroraToggleUI();
@@ -633,18 +799,6 @@
         document.getElementById('toggle-doublePage').className = `toggle-switch ${auroraPrefs.doublePage ? 'active' : ''}`;
         document.getElementById('toggle-timeEst').className = `toggle-switch ${auroraPrefs.timeEst ? 'active' : ''}`;
     }
-
-    function toggleLanguage() { 
-        let idx = supportedLangs.indexOf(currentLang); currentLang = supportedLangs[(idx + 1) % supportedLangs.length];
-        localStorage.setItem('readlite_lang', currentLang); applyLanguage(); refreshStatsUI(); switchTab(currentTab); 
-        if(currentDetailBookId && document.getElementById('detail-screen').classList.contains('active')) openBookDetail(currentDetailBookId); 
-    }
-    function applyLanguage() { 
-        const d = translations[currentLang]; 
-        document.querySelectorAll('[data-i18n]').forEach(el => { if(d[el.getAttribute('data-i18n')]) el.innerText = d[el.getAttribute('data-i18n')]; }); 
-        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { if(d[el.getAttribute('data-i18n-placeholder')]) el.setAttribute('placeholder', d[el.getAttribute('data-i18n-placeholder')]); }); 
-    }
-    function t(key) { return translations[currentLang][key] || key; }
 
     function openDrawer(id) { document.getElementById(id).classList.add('active'); document.getElementById('backdrop').classList.add('active'); }
     function openModal(id) { document.getElementById(id).classList.add('active'); document.getElementById('backdrop').classList.add('active'); }
@@ -659,94 +813,69 @@
         applyTypographyToReader();
     }
     
-    // ================= 统一颜色引擎 =================
     function getBookColor(b) {
         let c = b.dominantColor || b.color || defaultColors[b.id.charCodeAt(b.id.length - 1) % defaultColors.length];
-        if (c && c.startsWith('#')) {
-            let hex = c.replace('#', '');
-            if (hex.length === 3) hex = hex.split('').map(x => x + x).join('');
-            return `${parseInt(hex.substring(0, 2), 16)}, ${parseInt(hex.substring(2, 4), 16)}, ${parseInt(hex.substring(4, 6), 16)}`;
-        }
+        if (c && c.startsWith('#')) { let hex = c.replace('#', ''); if (hex.length === 3) hex = hex.split('').map(x => x + x).join(''); return `${parseInt(hex.substring(0, 2), 16)}, ${parseInt(hex.substring(2, 4), 16)}, ${parseInt(hex.substring(4, 6), 16)}`; }
         return c;
     }
 
-    // ================= 字体系统 (修复为精准匹配) =================
     function adjustFontSize(delta) { currentFontSize = Math.max(12, Math.min(36, currentFontSize + delta)); localStorage.setItem('readlite_fontsize', currentFontSize); updateTypographyUI(); applyTypographyToReader(); }
     function setLineHeight(val) { currentLineHeight = val; localStorage.setItem('readlite_lh', val); updateTypographyUI(); applyTypographyToReader(); }
     function setFontFamily(val) { currentFontFamily = val; localStorage.setItem('readlite_ff', val); updateTypographyUI(); applyTypographyToReader(); }
+    function setFontWeight(val) { currentFontWeight = val; localStorage.setItem('readlite_fw', val); updateTypographyUI(); applyTypographyToReader(); }
 
     function triggerCustomFont() { document.getElementById('custom-font-input').click(); }
     function handleCustomFont(e) {
         const file = e.target.files[0]; if(!file) return;
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-            customFontBase64 = evt.target.result;
-            localStorage.setItem('readlite_custom_font', customFontBase64);
-            loadCustomFontIfAny(); setFontFamily('ReadliteCustom, serif'); showToast("自定义字体导入成功！");
-        };
+        const reader = new FileReader(); reader.onload = function(evt) { customFontBase64 = evt.target.result; localStorage.setItem('readlite_custom_font', customFontBase64); loadCustomFontIfAny(); setFontFamily('ReadliteCustom, serif'); showToast("自定义字体导入成功！"); };
         reader.readAsDataURL(file); e.target.value = '';
     }
     function loadCustomFontIfAny() {
-        if(customFontBase64) {
-            let style = document.getElementById('rl-custom-font-style');
-            if(!style) { style = document.createElement('style'); style.id = 'rl-custom-font-style'; document.head.appendChild(style); }
-            style.innerHTML = `@font-face { font-family: 'ReadliteCustom'; src: url(${customFontBase64}); }`;
-        }
+        if(customFontBase64) { let style = document.getElementById('rl-custom-font-style'); if(!style) { style = document.createElement('style'); style.id = 'rl-custom-font-style'; document.head.appendChild(style); } style.innerHTML = `@font-face { font-family: 'ReadliteCustom'; src: url(${customFontBase64}); }`; }
     }
 
-    // 核心修复：更严格的包含/相等判断逻辑，解决黑宋切换 Bug
     function updateTypographyUI() {
         document.getElementById('font-size-display').innerText = currentFontSize;
-        document.querySelectorAll('#lh-1, #lh-2, #lh-3').forEach(el => el.classList.remove('active'));
-        document.getElementById(currentLineHeight < 1.6 ? 'lh-1' : currentLineHeight > 2.0 ? 'lh-3' : 'lh-2').classList.add('active');
+        document.querySelectorAll('#lh-1, #lh-2, #lh-3').forEach(el => el.classList.remove('active')); document.getElementById(currentLineHeight < 1.6 ? 'lh-1' : currentLineHeight > 2.0 ? 'lh-3' : 'lh-2').classList.add('active');
         document.querySelectorAll('#ff-1, #ff-2, #ff-custom').forEach(el => el.classList.remove('active'));
-        
-        if (currentFontFamily.includes('ReadliteCustom')) document.getElementById('ff-custom').classList.add('active');
-        else if (currentFontFamily === 'serif') document.getElementById('ff-2').classList.add('active');
-        else document.getElementById('ff-1').classList.add('active');
+        if (currentFontFamily.includes('ReadliteCustom')) document.getElementById('ff-custom').classList.add('active'); else if (currentFontFamily === 'serif') document.getElementById('ff-2').classList.add('active'); else document.getElementById('ff-1').classList.add('active');
+        document.querySelectorAll('#fw-1, #fw-2, #fw-3').forEach(el => el.classList.remove('active'));
+        if (currentFontWeight === '300') document.getElementById('fw-1').classList.add('active'); else if (currentFontWeight === '700') document.getElementById('fw-3').classList.add('active'); else document.getElementById('fw-2').classList.add('active');
     }
 
     function getEpubCSS() {
-        const bg = getComputedStyle(document.body).getPropertyValue('--reader-bg').trim();
-        const fg = getComputedStyle(document.body).getPropertyValue('--reader-color').trim();
+        const bg = getComputedStyle(document.body).getPropertyValue('--reader-bg').trim(); const fg = getComputedStyle(document.body).getPropertyValue('--reader-color').trim();
         let fontFaceStr = currentFontFamily.includes('ReadliteCustom') && customFontBase64 ? `@font-face { font-family: 'ReadliteCustom'; src: url(${customFontBase64}); }` : '';
-        return `${fontFaceStr} html, body { margin: 0 !important; padding: 16px 0 !important; background-color: ${bg} !important; color: ${fg} !important; font-family: ${currentFontFamily} !important; font-size: ${currentFontSize}px !important; line-height: ${currentLineHeight} !important; text-align: justify !important; } * { font-family: ${currentFontFamily} !important; } ::selection { background: rgba(0, 132, 255, 0.25); }`;
+        return `${fontFaceStr} html, body { margin: 0 !important; padding: 60px 0 40px 0 !important; background-color: ${bg} !important; color: ${fg} !important; font-family: ${currentFontFamily} !important; font-size: ${currentFontSize}px !important; font-weight: ${currentFontWeight} !important; line-height: ${currentLineHeight} !important; text-align: justify !important; } * { font-family: ${currentFontFamily} !important; font-weight: ${currentFontWeight} !important; } ::selection { background: rgba(0, 132, 255, 0.25); }`;
     }
     
     function applyTypographyToReader() {
-        const w = document.getElementById('viewport-wrapper');
-        w.style.fontSize = currentFontSize + 'px'; w.style.lineHeight = currentLineHeight; w.style.fontFamily = currentFontFamily;
-        if(epubRendition) epubRendition.getContents().forEach(c => { let s = c.document.getElementById('rl-style'); if(!s) { s = c.document.createElement('style'); s.id = 'rl-style'; c.document.head.appendChild(s); } s.innerHTML = getEpubCSS(); });
+        const w = document.getElementById('viewport-wrapper'); w.style.fontSize = currentFontSize + 'px'; w.style.lineHeight = currentLineHeight; w.style.fontFamily = currentFontFamily;
+        document.getElementById('txt-viewer').style.fontFamily = currentFontFamily; document.getElementById('txt-viewer').style.fontWeight = currentFontWeight;
+        
+        if(epubRendition && epubRendition.getContents) { 
+            epubRendition.getContents().forEach(c => { let s = c.document.getElementById('rl-style'); if(!s) { s = c.document.createElement('style'); s.id = 'rl-style'; c.document.head.appendChild(s); } s.innerHTML = getEpubCSS(); }); 
+            setTimeout(() => { epubRendition.views().forEach(v => v.pane ? v.pane.render() : null); }, 100);
+        }
     }
 
-    // ================= 色彩萃取引擎 =================
     function getDominantColor(imgSrc, callback) {
         const img = new Image(); img.src = imgSrc;
         img.onload = function() {
-            const canvas = document.createElement('canvas'); canvas.width = 10; canvas.height = 10;
-            const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, 10, 10);
-            try {
-                const data = ctx.getImageData(0, 0, 10, 10).data; let r=0, g=0, b=0, count=0;
-                for(let i=0; i<data.length; i+=4) { r+=data[i]; g+=data[i+1]; b+=data[i+2]; count++; }
-                callback(`${Math.floor(r/count)}, ${Math.floor(g/count)}, ${Math.floor(b/count)}`);
-            } catch(e) { callback(null); }
+            const canvas = document.createElement('canvas'); canvas.width = 10; canvas.height = 10; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, 10, 10);
+            try { const data = ctx.getImageData(0, 0, 10, 10).data; let r=0, g=0, b=0, count=0; for(let i=0; i<data.length; i+=4) { r+=data[i]; g+=data[i+1]; b+=data[i+2]; count++; } callback(`${Math.floor(r/count)}, ${Math.floor(g/count)}, ${Math.floor(b/count)}`); } catch(e) { callback(null); }
         }
     }
 
     function triggerColorPickerForDetail() { document.getElementById('color-picker').click(); }
     function handleColorChange(e) {
-        if(!currentDetailBookId) return;
-        const hex = e.target.value; const tx = db.transaction(['books'], 'readwrite'); const store = tx.objectStore('books');
-        store.get(currentDetailBookId).onsuccess = (ev) => {
-            const b = ev.target.result; const r = parseInt(hex.substring(1,3), 16), g = parseInt(hex.substring(3,5), 16), bVal = parseInt(hex.substring(5,7), 16);
-            b.dominantColor = `${r}, ${g}, ${bVal}`; store.put(b).onsuccess = () => { openBookDetail(b.id); loadBookshelf(); };
-        };
+        if(!currentDetailBookId) return; const hex = e.target.value; const tx = db.transaction(['books'], 'readwrite'); const store = tx.objectStore('books');
+        store.get(currentDetailBookId).onsuccess = (ev) => { const b = ev.target.result; const r = parseInt(hex.substring(1,3), 16), g = parseInt(hex.substring(3,5), 16), bVal = parseInt(hex.substring(5,7), 16); b.dominantColor = `${r}, ${g}, ${bVal}`; store.put(b).onsuccess = () => { openBookDetail(b.id); loadBookshelf(); }; };
     }
 
-    // ================= 书架渲染、智能标签与闪念漫游 =================
     function toggleSort() {
         if (sortMode === 'recent') sortMode = 'progress'; else if (sortMode === 'progress') sortMode = 'title'; else sortMode = 'recent';
-        let msg = sortMode === 'recent' ? t('sort_recent') : sortMode === 'progress' ? t('sort_progress') : t('sort_title');
+        let msg = sortMode === 'recent' ? '排序：最近阅读' : sortMode === 'progress' ? '排序：阅读进度' : '排序：书名首字母';
         showToast(msg); loadBookshelf();
     }
 
@@ -755,20 +884,45 @@
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); 
         document.getElementById('nav-' + tab).classList.add('active');
         
-        // 核心修复：直接清空 DOM 阻止未收藏的书籍残影闪烁
-        document.getElementById('bookshelf').innerHTML = '';
+        const mainScroll = document.getElementById('main-content-scroll');
+        const searchContainer = document.querySelector('.search-container');
+        const fabBtn = document.querySelector('.fab');
 
-        if(tab === 'quotes') {
-            document.getElementById('bookshelf').style.display = 'none';
-            document.getElementById('tags-filter-bar').style.display = 'none';
-            document.getElementById('quotes-feed').style.display = 'flex';
-            renderQuotesFeed();
+        if(tab === 'quotes' || tab === 'discover') {
+            searchContainer.style.opacity = '0';
+            fabBtn.style.opacity = '0';
+            searchContainer.style.pointerEvents = 'none';
+            fabBtn.style.pointerEvents = 'none';
         } else {
-            document.getElementById('quotes-feed').style.display = 'none';
-            document.getElementById('bookshelf').style.display = viewMode === 'grid' ? 'grid' : 'flex';
-            document.getElementById('tags-filter-bar').style.display = 'flex';
-            loadBookshelf();
+            searchContainer.style.pointerEvents = 'auto';
+            fabBtn.style.pointerEvents = 'auto';
         }
+
+        mainScroll.style.opacity = '0';
+
+        setTimeout(() => {
+            document.getElementById('bookshelf').innerHTML = '';
+            const bShelf = document.getElementById('bookshelf'), tBar = document.getElementById('tags-filter-bar'), qFeed = document.getElementById('quotes-feed'), zView = document.getElementById('zen-view');
+
+            bShelf.style.display = 'none'; tBar.style.display = 'none'; qFeed.style.display = 'none'; zView.style.display = 'none';
+
+            if(tab === 'quotes' || tab === 'discover') {
+                searchContainer.style.display = 'none';
+                fabBtn.style.display = 'none';
+            } else {
+                searchContainer.style.display = 'block';
+                fabBtn.style.display = 'flex';
+                void searchContainer.offsetWidth;
+                searchContainer.style.opacity = '1';
+                fabBtn.style.opacity = '1';
+            }
+
+            if(tab === 'quotes') { qFeed.style.display = 'flex'; renderQuotesFeed(); } 
+            else if(tab === 'discover') { zView.style.display = 'flex'; renderZenView(); }
+            else { bShelf.style.display = viewMode === 'grid' ? 'grid' : 'flex'; tBar.style.display = 'flex'; loadBookshelf(); }
+            
+            mainScroll.style.opacity = '1';
+        }, 150);
     }
     
     function toggleView() { viewMode = viewMode === 'grid' ? 'list' : 'grid'; document.getElementById('bookshelf').className = viewMode === 'grid' ? 'bookshelf-grid' : 'bookshelf-grid list-view'; document.getElementById('view-icon').innerText = viewMode === 'grid' ? 'view_list' : 'grid_view'; }
@@ -777,10 +931,7 @@
     function loadBookshelf() {
         db.transaction(['books']).objectStore('books').getAll().onsuccess = (e) => {
             let b = e.target.result || [];
-            
-            let allTags = new Set();
-            b.forEach(book => { if(book.tags) book.tags.forEach(t => allTags.add(t)); });
-            renderTagsFilter(Array.from(allTags));
+            let allTags = new Set(); b.forEach(book => { if(book.tags) book.tags.forEach(t => allTags.add(t)); }); renderTagsFilter(Array.from(allTags));
 
             if(searchQuery) b = b.filter(x => x.title.toLowerCase().includes(searchQuery));
             if(currentTab === 'favorites') b = b.filter(x => x.isFavorite);
@@ -795,29 +946,25 @@
     }
 
     function renderTagsFilter(tags) {
-        const bar = document.getElementById('tags-filter-bar');
-        if(tags.length === 0 && currentTab !== 'favorites') { bar.style.display = 'none'; return; }
-        if(currentTab === 'quotes') return; 
+        const bar = document.getElementById('tags-filter-bar'); if(tags.length === 0 && currentTab !== 'favorites') { bar.style.display = 'none'; return; }
+        if(currentTab === 'quotes' || currentTab === 'discover') return; 
         
-        bar.style.display = 'flex';
-        let html = `<div class="tag-chip ${!activeTag ? 'active' : ''}" onclick="filterByTag(null)">全部</div>`;
-        tags.forEach(tag => { html += `<div class="tag-chip ${activeTag === tag ? 'active' : ''}" onclick="filterByTag('${tag}')">#${tag}</div>`; });
-        bar.innerHTML = html;
+        bar.style.display = 'flex'; let html = `<div class="tag-chip ${!activeTag ? 'active' : ''}" onclick="filterByTag(null)">全部</div>`;
+        tags.forEach(tag => { html += `<div class="tag-chip ${activeTag === tag ? 'active' : ''}" onclick="filterByTag('${tag}')">#${tag}</div>`; }); bar.innerHTML = html;
     }
     function filterByTag(tag) { activeTag = tag; loadBookshelf(); }
 
     function renderBooks(books) {
         const s = document.getElementById('bookshelf'); s.innerHTML = ''; 
-        if(books.length === 0) {
-            document.getElementById('empty-view').style.display = 'block';
-            document.getElementById('empty-text').innerText = currentTab === 'favorites' ? t('empty_fav') : t('empty_all');
-        } else { document.getElementById('empty-view').style.display = 'none'; }
+        if(books.length === 0) { document.getElementById('empty-view').style.display = 'block'; document.getElementById('empty-text').innerText = "空空如也"; } else { document.getElementById('empty-view').style.display = 'none'; }
         
         const frag = document.createDocumentFragment();
         books.forEach((b) => {
-            const c = document.createElement('div'); c.className = 'book-card';
-            const f = getBookColor(b); 
-            c.style.borderLeftColor = `rgb(${f})`; c.style.setProperty('--book-color', `rgb(${f})`); c.onclick = () => openBookDetail(b.id);
+            const c = document.createElement('div'); c.className = 'book-card'; const f = getBookColor(b); 
+            c.style.borderLeftColor = `rgb(${f})`; 
+            c.style.setProperty('--book-color', `rgb(${f})`); 
+            c.style.setProperty('--book-rgb', f);
+            c.onclick = () => openBookDetail(b.id);
             const p = Math.round((b.progress || 0) * 100), i = b.type === 'epub' ? 'menu_book' : b.type === 'pdf' ? 'picture_as_pdf' : 'segment';
             const coverHtml = b.cover ? `<img src="${b.cover}" style="width:100%; height:100%; object-fit:cover; display:block;">` : `<span class="material-symbols-outlined icon">${i}</span><div class="book-title">${b.title}</div>`;
             c.innerHTML = `<div class="book-cover-placeholder" style="${b.cover ? 'padding:0;' : ''}">${coverHtml}</div><div class="book-info-bottom"><div class="list-title-display">${b.title}</div><div class="progress-bar-container"><div class="progress-bar-fill" style="width:${p}%;"></div></div></div>`;
@@ -826,27 +973,54 @@
         s.appendChild(frag);
     }
 
+    function openQuoteAction(bookId, cfi, text) {
+        activeQuoteContext = { bookId, cfi, text };
+        document.getElementById('quote-action-preview').innerText = `"${text}"`;
+        document.getElementById('quote-action-sheet').classList.add('active');
+        document.getElementById('backdrop').classList.add('active');
+    }
+
+    function executeQuoteAction(action) {
+        closeOverlays();
+        const { bookId, cfi, text } = activeQuoteContext;
+        if (!bookId) return;
+
+        if (action === 'trace') {
+            if (currentTab === 'quotes' || currentTab === 'discover') { openQuoteInReader(bookId, cfi); } 
+            else { enterReaderWithDetail(cfi); }
+        } else if (action === 'card') {
+            generateCardFromQuote(bookId, text);
+        } else if (action === 'delete') {
+            if(confirm("确定要删除这条划线记录吗？")) {
+                const s = db.transaction(['books'], 'readwrite').objectStore('books');
+                s.get(bookId).onsuccess = (e) => {
+                    const b = e.target.result;
+                    if(b && b.notes) {
+                        b.notes = b.notes.filter(n => !(n.cfi === cfi && n.text === text));
+                        s.put(b).onsuccess = () => {
+                            showToast("已删除");
+                            if(currentTab === 'quotes') renderQuotesFeed();
+                            else if(currentDetailBookId === bookId) openBookDetail(bookId);
+                        };
+                    }
+                };
+            }
+        }
+    }
+
     function renderQuotesFeed() {
         db.transaction(['books']).objectStore('books').getAll().onsuccess = (e) => {
             let books = e.target.result || []; let allNotes = [];
-            books.forEach(b => {
-                if(b.notes) { b.notes.forEach(n => allNotes.push({ ...n, bookId: b.id, bookTitle: b.title, bookColor: getBookColor(b) })); }
-            });
+            books.forEach(b => { if(b.notes) { b.notes.forEach(n => allNotes.push({ ...n, bookId: b.id, bookTitle: b.title, bookColor: getBookColor(b) })); } });
             allNotes.sort((a, b) => b.time - a.time);
             
             const qf = document.getElementById('quotes-feed'); qf.innerHTML = '';
-            if(allNotes.length === 0) {
-                document.getElementById('empty-view').style.display = 'block';
-                document.getElementById('empty-text').innerText = t('empty_quotes');
-            } else { document.getElementById('empty-view').style.display = 'none'; }
+            if(allNotes.length === 0) { document.getElementById('empty-view').style.display = 'block'; document.getElementById('empty-text').innerText = "空空如也"; } else { document.getElementById('empty-view').style.display = 'none'; }
 
             let html = '';
             allNotes.forEach(n => {
-                const isHighlight = n.type === 'highlight';
-                const langMap = { 'zh': 'zh-CN', 'en': 'en-US', 'ja': 'ja-JP', 'ko': 'ko-KR' };
-                const dateStr = new Date(n.time).toLocaleDateString(langMap[currentLang]);
-                const target = isHighlight ? n.cfi : (n.progressDetail || '');
-                html += `<div class="quote-card" onclick="openQuoteInReader('${n.bookId}', '${target}')" style="border-left: 4px solid rgb(${n.bookColor});">
+                const isHighlight = n.type === 'highlight'; const dateStr = new Date(n.time).toLocaleDateString('zh-CN'); const target = isHighlight ? n.cfi : (n.progressDetail || '');
+                html += `<div class="quote-card" onclick="openQuoteAction('${n.bookId}', '${target}', decodeURIComponent('${encodeURIComponent(n.text || '')}'))" style="border-left: 4px solid rgb(${n.bookColor});">
                             <div class="quote-header"><div class="quote-book-title"><span class="material-symbols-outlined" style="font-size:16px;">menu_book</span>${n.bookTitle}</div><span style="font-size:11px; color:var(--md-on-surface-variant);">${dateStr}</span></div>
                             <div class="${isHighlight ? 'quote-text' : 'note-text'}">${escapeHtml(n.text || '🔖 标签')}</div>
                          </div>`;
@@ -854,63 +1028,71 @@
             qf.innerHTML = html;
         };
     }
+
+    function renderZenView() {
+        db.transaction(['books']).objectStore('books').getAll().onsuccess = (e) => {
+            let books = e.target.result || [];
+            if(books.length === 0) { document.getElementById('empty-view').style.display = 'block'; document.getElementById('empty-text').innerText = "书架空空如也"; return; }
+            document.getElementById('empty-view').style.display = 'none';
+            
+            const seed = new Date().getDate(); const b = books[seed % books.length]; const rgb = getBookColor(b);
+            let quoteHtml = '';
+            if (b.notes && b.notes.length > 0) {
+                const highlights = b.notes.filter(n => n.type === 'highlight');
+                if(highlights.length > 0) { const h = highlights[seed % highlights.length]; quoteHtml = `<div class="zen-quote">${escapeHtml(h.text)}</div>`; }
+            }
+            const coverHtml = b.cover ? `<img src="${b.cover}" style="width:140px; height:200px; object-fit:cover; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">` : `<div style="width:140px; height:200px; background: linear-gradient(135deg, var(--md-surface-container), var(--md-surface-container-high)); border-radius: 8px; display:flex; align-items:center; justify-content:center; box-shadow: 0 8px 24px rgba(0,0,0,0.15);"><span class="material-symbols-outlined" style="font-size:48px; color:rgb(${rgb})">${b.type === 'epub' ? 'menu_book' : 'segment'}</span></div>`;
+            document.getElementById('zen-content').innerHTML = `
+                <div style="font-size: 13px; font-weight: 700; color: var(--md-on-surface-variant); margin-bottom: 24px; text-transform: uppercase; letter-spacing: 2px;">今日共读</div>
+                <div class="zen-card" style="--md-primary: rgb(${rgb}); --md-primary-rgb: ${rgb};">
+                    ${coverHtml}
+                    <div class="zen-title">${b.title}</div>
+                    ${quoteHtml}
+                    <button class="zen-btn" onclick="openBookDetail('${b.id}')">翻开这本书</button>
+                </div>
+            `;
+        };
+    }
     
-    // ================= 个人热力图引擎 =================
     function openHeatmap() {
-        closeOverlays();
-        const container = document.getElementById('heatmap-container');
-        let history = JSON.parse(localStorage.getItem('rl_history') || '{}');
-        let html = '';
-        
-        const today = new Date();
-        const dayOfWeek = today.getDay(); // 0 is Sunday
-        const totalDays = 7 * 12 + (dayOfWeek + 1); // 显示约 12 周的数据
-        
-        const startDate = new Date(today);
-        startDate.setDate(today.getDate() - totalDays + 1);
-        
+        closeOverlays(); const container = document.getElementById('heatmap-container'); let history = JSON.parse(localStorage.getItem('rl_history') || '{}'); let html = '';
+        const today = new Date(); const dayOfWeek = today.getDay(); const totalDays = 7 * 12 + (dayOfWeek + 1); const startDate = new Date(today); startDate.setDate(today.getDate() - totalDays + 1);
         for(let i = 0; i < totalDays; i++) {
-            let d = new Date(startDate);
-            d.setDate(startDate.getDate() + i);
-            let dateStr = d.toISOString().slice(0,10);
-            let mins = history[dateStr] || 0;
-            
-            let level = 0;
-            if(mins > 0) level = 1;
-            if(mins > 15) level = 2;
-            if(mins > 30) level = 3;
-            if(mins > 60) level = 4;
-            
-            let opacity = level === 0 ? 0.05 : (0.25 * level);
-            let title = `${dateStr}: ${mins} ${t('time_min')}`;
+            let d = new Date(startDate); d.setDate(startDate.getDate() + i); let dateStr = d.toISOString().slice(0,10); let mins = history[dateStr] || 0;
+            let level = 0; if(mins > 0) level = 1; if(mins > 15) level = 2; if(mins > 30) level = 3; if(mins > 60) level = 4;
+            let opacity = level === 0 ? 0.05 : (0.25 * level); let title = `${dateStr}: ${mins} 分钟`;
             html += `<div class="heat-cell" title="${title}" style="background-color: rgba(var(--md-primary-rgb), ${opacity});"></div>`;
         }
-        container.innerHTML = html;
-        setTimeout(() => openModal('heatmap-modal'), 100);
+        container.innerHTML = html; setTimeout(() => openModal('heatmap-modal'), 100);
     }
 
     function handleFileImport(ev) {
         const f = ev.target.files[0]; if(!f) return; 
-        const ext = f.name.toLowerCase().split('.').pop(); const fileType = (ext === 'epub' || ext === 'pdf') ? ext : 'txt';
-        const r = new FileReader();
+        const ext = f.name.toLowerCase().split('.').pop(); const fileType = (ext === 'epub' || ext === 'pdf') ? ext : 'txt'; const r = new FileReader();
         if(fileType === 'epub' || fileType === 'pdf') r.readAsArrayBuffer(f); else r.readAsText(f, 'UTF-8');
         r.onload = async (e) => { 
-            const content = e.target.result;
-            let author = t('detail_author'); let title = f.name.replace(/\.(txt|epub|pdf)$/i, ''); let coverData = null;
-
-            if (fileType === 'epub') {
-                try {
-                    const tempBook = ePub(content); const meta = await tempBook.loaded.metadata;
-                    if (meta.creator) author = meta.creator; if (meta.title) title = meta.title;
-                    const coverUrl = await tempBook.coverUrl();
-                    if (coverUrl) {
-                        const blob = await fetch(coverUrl).then(res => res.blob());
-                        coverData = await new Promise(resolve => { const reader = new FileReader(); reader.onloadend = () => resolve(reader.result); reader.readAsDataURL(blob); });
-                    }
-                } catch (err) { console.error('EPUB 解析失败:', err); }
+            let content = e.target.result; let author = "本地文件"; let title = f.name.replace(/\.(txt|epub|pdf)$/i, ''); let coverData = null;
+            
+            if (fileType === 'txt') { content = content.replace(/([\u4e00-\u9fa5])\n([\u4e00-\u9fa5])/g, '$1$2'); }
+            
+            if (fileType === 'epub') { 
+                try { 
+                    const tempBook = ePub(content); const meta = await tempBook.loaded.metadata; 
+                    if (meta.creator) author = meta.creator; if (meta.title) title = meta.title; 
+                    const coverUrl = await tempBook.coverUrl(); 
+                    if (coverUrl) { const blob = await fetch(coverUrl).then(res => res.blob()); coverData = await new Promise(resolve => { const reader = new FileReader(); reader.onloadend = () => resolve(reader.result); reader.readAsDataURL(blob); }); } 
+                } catch (err) { console.error('EPUB 解析失败:', err); } 
             }
             const book = { id: 'bk_'+Date.now(), title: title, author: author, cover: coverData, type: fileType, content: content, progress: 0, isFavorite: false, rating: 0, notes: [], tags: [], lastRead: Date.now(), addedDate: Date.now() };
-            db.transaction(['books'], 'readwrite').objectStore('books').add(book).onsuccess = () => { loadBookshelf(); showToast("导入成功"); }; 
+            
+            if (coverData) {
+                getDominantColor(coverData, (rgb) => {
+                    book.dominantColor = rgb || getBookColor(book);
+                    db.transaction(['books'], 'readwrite').objectStore('books').add(book).onsuccess = () => { loadBookshelf(); showToast("导入成功"); }; 
+                });
+            } else {
+                db.transaction(['books'], 'readwrite').objectStore('books').add(book).onsuccess = () => { loadBookshelf(); showToast("导入成功"); }; 
+            }
         }; 
         ev.target.value = '';
     }
@@ -918,20 +1100,9 @@
     function exportMarkdown() {
         if(!currentDetailBookId) return;
         db.transaction(['books']).objectStore('books').get(currentDetailBookId).onsuccess = (e) => {
-            const b = e.target.result; if(!b) return;
-            let md = `# ${b.title}\n\n**作者:** ${b.author || '未知'}\n**导出时间:** ${new Date().toLocaleString()}\n\n---\n\n### 我的笔记与划线\n\n`;
-            if (!b.notes || b.notes.length === 0) { md += "> 暂无笔记。"; } 
-            else {
-                const sortedNotes = [...b.notes].sort((x, y) => x.progress - y.progress);
-                sortedNotes.forEach(n => {
-                    const icon = n.type === 'highlight' ? '🖍️' : '📝';
-                    md += `#### ${icon} 进度: ${(n.progress*100).toFixed(1)}%\n`;
-                    if (n.type === 'highlight') md += `> ${n.text}\n\n`; else md += `- ${n.text}\n\n`;
-                });
-            }
-            const blob = new Blob(['\uFEFF' + md], {type: "text/markdown;charset=utf-8"});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${b.title}_Notes.md`; a.click();
-            showToast("Markdown 导出成功！");
+            const b = e.target.result; if(!b) return; let md = `# ${b.title}\n\n**作者:** ${b.author || '未知'}\n**导出时间:** ${new Date().toLocaleString()}\n\n---\n\n### 我的笔记与划线\n\n`;
+            if (!b.notes || b.notes.length === 0) { md += "> 暂无笔记。"; } else { const sortedNotes = [...b.notes].sort((x, y) => x.progress - y.progress); sortedNotes.forEach(n => { const icon = n.type === 'highlight' ? '🖍️' : '📝'; md += `#### ${icon} 进度: ${(n.progress*100).toFixed(1)}%\n`; if (n.type === 'highlight') md += `> ${n.text}\n\n`; else md += `- ${n.text}\n\n`; }); }
+            const blob = new Blob(['\uFEFF' + md], {type: "text/markdown;charset=utf-8"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${b.title}_Notes.md`; a.click(); showToast("Markdown 导出成功！");
         };
     }
 
@@ -939,43 +1110,23 @@
         currentDetailBookId = id;
         db.transaction(['books'], 'readwrite').objectStore('books').get(id).onsuccess = (e) => {
             const b = e.target.result; if(!b) return;
-            
             const applyTheme = (rgbStr) => {
                 document.getElementById('detail-screen').style.setProperty('--dynamic-rgb', rgbStr);
-                const coverWrapper = document.getElementById('detail-cover');
-                coverWrapper.style.borderLeftColor = `rgb(${rgbStr})`;
-                if (b.cover) { coverWrapper.innerHTML = `<img src="${b.cover}" style="width:100%; height:100%; object-fit:cover; display:block;">`; } 
-                else { coverWrapper.innerHTML = `<span class="material-symbols-outlined icon" id="detail-cover-icon" style="color:rgb(${rgbStr});">${b.type === 'epub' ? 'menu_book' : 'segment'}</span>`; }
-                
-                document.getElementById('detail-title').innerText = b.title; document.getElementById('detail-author').innerText = b.author || t('detail_author');
-                const dateObj = new Date(b.addedDate || b.lastRead || Date.now()); const langMap = { 'zh': 'zh-CN', 'en': 'en-US', 'ja': 'ja-JP', 'ko': 'ko-KR' };
-                document.getElementById('detail-stat-date').innerText = dateObj.toLocaleDateString(langMap[currentLang]);
-                
-                const p = Math.round((b.progress || 0) * 100); document.getElementById('detail-stat-prog').innerText = p + "%"; 
-                document.getElementById('detail-read-btn').innerHTML = `<span data-i18n="${p === 0 ? 'read_start' : p === 100 ? 'read_again' : 'read_cont'}">${p === 0 ? t('read_start') : p === 100 ? t('read_again') : t('read_cont')}</span>`;
-                
+                const coverWrapper = document.getElementById('detail-cover'); coverWrapper.style.borderLeftColor = `rgb(${rgbStr})`;
+                if (b.cover) { coverWrapper.innerHTML = `<img src="${b.cover}" style="width:100%; height:100%; object-fit:cover; display:block;">`; } else { coverWrapper.innerHTML = `<span class="material-symbols-outlined icon" id="detail-cover-icon" style="color:rgb(${rgbStr});">${b.type === 'epub' ? 'menu_book' : 'segment'}</span>`; }
+                document.getElementById('detail-title').innerText = b.title; document.getElementById('detail-author').innerText = b.author || "本地文件"; const dateObj = new Date(b.addedDate || b.lastRead || Date.now()); document.getElementById('detail-stat-date').innerText = dateObj.toLocaleDateString('zh-CN');
+                const p = Math.round((b.progress || 0) * 100); document.getElementById('detail-stat-prog').innerText = p + "%"; document.getElementById('detail-read-btn').innerHTML = `<span>${p === 0 ? '开始阅读' : p === 100 ? '重新阅读' : '继续阅读'}</span>`;
                 updateDetailFavIcon(b.isFavorite); updateStarsUI(b.rating || 0); renderTagsInDetail(b);
-
                 const nList = document.getElementById('detail-notes-list'), nSec = document.getElementById('detail-notes-section');
                 if(b.notes && b.notes.length > 0) {
-                    nSec.style.display = 'flex';
-                    nList.innerHTML = b.notes.map(n => {
-                        const isHighlight = n.type === 'highlight'; const icon = isHighlight ? '🖍️' : '📝'; const target = isHighlight ? n.cfi : (n.progressDetail || '');
-                        return `<div class="note-card" onclick="enterReaderWithDetail('${target}')"><div style="margin-bottom:6px; opacity:0.8; display:flex; justify-content:space-between; align-items:center;"><span>${icon} ${(n.progress*100).toFixed(1)}%</span><span style="font-size:10px;">${new Date(n.time).toLocaleDateString(langMap[currentLang])}</span></div><div style="${isHighlight ? 'font-style:italic; border-left: 2px solid var(--md-outline); padding-left: 8px;' : ''}">${escapeHtml(n.text || '🔖 标签')}</div></div>`;
+                    nSec.style.display = 'flex'; nList.innerHTML = b.notes.map(n => { 
+                        const isHighlight = n.type === 'highlight'; const icon = isHighlight ? '🖍️' : '📝'; const target = isHighlight ? n.cfi : (n.progressDetail || ''); 
+                        return `<div class="note-card" onclick="openQuoteAction('${b.id}', '${target}', decodeURIComponent('${encodeURIComponent(n.text || '')}'))"><div style="margin-bottom:6px; opacity:0.8; display:flex; justify-content:space-between; align-items:center;"><span>${icon} ${(n.progress*100).toFixed(1)}%</span><span style="font-size:10px;">${new Date(n.time).toLocaleDateString('zh-CN')}</span></div><div style="${isHighlight ? 'font-style:italic; border-left: 2px solid var(--md-outline); padding-left: 8px;' : ''}">${escapeHtml(n.text || '🔖 标签')}</div></div>`; 
                     }).join('');
                 } else nSec.style.display = 'none';
-
                 document.getElementById('detail-screen').classList.add('active');
             };
-
-            if (b.dominantColor) { applyTheme(getBookColor(b)); } 
-            else if (b.cover) {
-                getDominantColor(b.cover, (rgb) => {
-                    b.dominantColor = rgb || getBookColor(b);
-                    db.transaction(['books'], 'readwrite').objectStore('books').put(b).onsuccess = () => { loadBookshelf(); };
-                    applyTheme(b.dominantColor);
-                });
-            } else { applyTheme(getBookColor(b)); }
+            if (b.dominantColor) { applyTheme(getBookColor(b)); } else if (b.cover) { getDominantColor(b.cover, (rgb) => { b.dominantColor = rgb || getBookColor(b); db.transaction(['books'], 'readwrite').objectStore('books').put(b).onsuccess = () => { loadBookshelf(); }; applyTheme(b.dominantColor); }); } else { applyTheme(getBookColor(b)); }
         };
     }
 
@@ -984,23 +1135,8 @@
         if(b.tags) { b.tags.forEach(tag => { row.innerHTML += `<div class="detail-tag" onclick="removeTagFromBook('${tag}')">#${tag}</div>`; }); }
         row.innerHTML += `<div class="detail-tag-add" onclick="addTagToBook()">+ 添加标签</div>`;
     }
-    function addTagToBook() {
-        const newTag = prompt(t('add_tag_prompt')); if(!newTag || !newTag.trim()) return;
-        const tx = db.transaction(['books'], 'readwrite'); const store = tx.objectStore('books');
-        store.get(currentDetailBookId).onsuccess = (e) => {
-            const b = e.target.result; if(!b.tags) b.tags = [];
-            if(!b.tags.includes(newTag.trim())) { b.tags.push(newTag.trim()); store.put(b).onsuccess = () => { renderTagsInDetail(b); loadBookshelf(); }; }
-        };
-    }
-    function removeTagFromBook(tag) {
-        if(confirm(`确定要移除标签 #${tag} 吗？`)) {
-            const tx = db.transaction(['books'], 'readwrite'); const store = tx.objectStore('books');
-            store.get(currentDetailBookId).onsuccess = (e) => {
-                const b = e.target.result; b.tags = b.tags.filter(t => t !== tag);
-                store.put(b).onsuccess = () => { renderTagsInDetail(b); loadBookshelf(); };
-            };
-        }
-    }
+    function addTagToBook() { const newTag = prompt("输入新标签"); if(!newTag || !newTag.trim()) return; const tx = db.transaction(['books'], 'readwrite'); const store = tx.objectStore('books'); store.get(currentDetailBookId).onsuccess = (e) => { const b = e.target.result; if(!b.tags) b.tags = []; if(!b.tags.includes(newTag.trim())) { b.tags.push(newTag.trim()); store.put(b).onsuccess = () => { renderTagsInDetail(b); loadBookshelf(); }; } }; }
+    function removeTagFromBook(tag) { if(confirm(`确定要移除标签 #${tag} 吗？`)) { const tx = db.transaction(['books'], 'readwrite'); const store = tx.objectStore('books'); store.get(currentDetailBookId).onsuccess = (e) => { const b = e.target.result; b.tags = b.tags.filter(t => t !== tag); store.put(b).onsuccess = () => { renderTagsInDetail(b); loadBookshelf(); }; }; } }
     
     function closeBookDetail() { document.getElementById('detail-screen').classList.remove('active'); loadBookshelf(); }
     function deleteCurrentDetailBook() { if(confirm("确定移出书架吗？")) { db.transaction(['books'], 'readwrite').objectStore('books').delete(currentDetailBookId).onsuccess = () => { closeBookDetail(); showToast("已删除"); }; } }
@@ -1012,63 +1148,73 @@
 
     function openQuoteInReader(bookId, target) { currentDetailBookId = bookId; enterReaderWithDetail(target); }
     function enterReader() { enterReaderWithDetail(null); }
+    
     function enterReaderWithDetail(target) {
         if(!currentDetailBookId) return;
         db.transaction(['books'], 'readwrite').objectStore('books').get(currentDetailBookId).onsuccess = (e) => {
             const b = e.target.result; b.lastRead = Date.now(); if(target !== null && target !== '') b.progressDetail = target;
-            db.transaction(['books'], 'readwrite').objectStore('books').put(b);
+            db.transaction(['books'], 'readwrite').objectStore('books').put(b); 
             activeBookId = b.id; document.getElementById('reader-title').innerText = b.title;
-            applyTypographyToReader(); document.getElementById('reader-container').classList.add('active');
             
-            if (b.type === 'txt') { showTxt(b); genTxtTOC(b.content); } 
-            else if (b.type === 'pdf') { showPdf(b); }
-            else { showEpub(b); }
+            document.getElementById('reader-container').classList.remove('fullscreen'); lastScrollY = 0;
+            
+            currentBookContext.type = b.type;
+            if (b.type === 'txt') { currentBookContext.totalMins = Math.max(1, Math.ceil(b.content.length / 400)); }
+
+            applyTypographyToReader(); document.getElementById('reader-container').classList.add('active');
+            if (b.type === 'txt') { showTxt(b); genTxtTOC(b.content); } else if (b.type === 'pdf') { showPdf(b); } else { showEpub(b); }
         };
     }
 
-    function genTxtTOC(text) {
-        currentToc = []; const r = /(?:^|\n)(第[零一二三四五六七八九十百千0-9]+[章回节卷篇][^\n]{0,30})/g; let m;
-        while ((m = r.exec(text)) !== null) currentToc.push({ title: m[1].trim(), detail: m.index }); renderTOC();
-    }
-    function renderTOC() {
-        const l = document.getElementById('toc-list');
-        if(currentToc.length === 0) { l.innerHTML = '<div style="padding:24px; color:var(--md-outline);">未找到目录结构</div>'; return; }
-        l.innerHTML = currentToc.map(i => `<div class="toc-item" onclick="jumpToToc('${i.detail}')">${escapeHtml(i.title)}</div>`).join('');
-    }
+    function genTxtTOC(text) { currentToc = []; const r = /(?:^|\n)(第[零一二三四五六七八九十百千0-9]+[章回节卷篇][^\n]{0,30})/g; let m; while ((m = r.exec(text)) !== null) currentToc.push({ title: m[1].trim(), detail: m.index }); renderTOC(); }
+    function renderTOC() { const l = document.getElementById('toc-list'); if(currentToc.length === 0) { l.innerHTML = '<div style="padding:24px; color:var(--md-outline);">未找到目录结构</div>'; return; } l.innerHTML = currentToc.map(i => `<div class="toc-item" onclick="jumpToToc('${i.detail}')">${escapeHtml(i.title)}</div>`).join(''); }
     function jumpToToc(d) { closeOverlays(); if(epubRendition) epubRendition.display(d); else document.getElementById('viewport-wrapper').scrollTop = parseInt(d); }
     
-    // ================= 全新多轨划线系统 =================
     function addNote() {
-        if(!activeBookId) return; const t_val = prompt(t('prompt_note')); if(t_val === null) return;
+        if(!activeBookId) return; const t_val = prompt("输入批注内容 (留空仅添加书签)："); if(t_val === null) return;
         const s = db.transaction(['books'], 'readwrite').objectStore('books');
-        s.get(activeBookId).onsuccess = (e) => {
-            const b = e.target.result; if(!b.notes) b.notes = [];
-            b.notes.unshift({ type: 'note', text: t_val, progressDetail: b.progressDetail, progress: b.progress, time: Date.now() });
-            s.put(b).onsuccess = () => showToast("批注已保存");
-        };
+        s.get(activeBookId).onsuccess = (e) => { const b = e.target.result; if(!b.notes) b.notes = []; b.notes.unshift({ type: 'note', text: t_val, progressDetail: b.progressDetail, progress: b.progress, time: Date.now() }); s.put(b).onsuccess = () => showToast("批注已保存"); };
     }
 
     function clearSelectionUI() { document.getElementById('selection-toolbar').classList.remove('active'); if (currentSelectionInfo && currentSelectionInfo.contents) currentSelectionInfo.contents.window.getSelection().removeAllRanges(); currentSelectionInfo = null; }
 
     function saveHighlight() {
-        if (!currentSelectionInfo || !activeBookId) return;
-        const { cfiRange, text, type, start, end } = currentSelectionInfo;
-        const s = db.transaction(['books'], 'readwrite').objectStore('books');
+        if (!currentSelectionInfo || !activeBookId) return; const { cfiRange, text, type, start, end } = currentSelectionInfo; const s = db.transaction(['books'], 'readwrite').objectStore('books');
         s.get(activeBookId).onsuccess = (e) => {
-            const b = e.target.result; if(!b.notes) b.notes = [];
-            const isDuplicate = b.notes.some(n => n.type === 'highlight' && n.cfi === cfiRange);
+            const b = e.target.result; if(!b.notes) b.notes = []; const isDuplicate = b.notes.some(n => n.type === 'highlight' && n.cfi === cfiRange);
             if(isDuplicate) { showToast("已在此处划线，请勿重复操作"); clearSelectionUI(); return; }
-
-            if (type === 'txt') {
-                const isOverlap = b.notes.some(n => n.type === 'highlight' && n.start !== undefined && Math.max(start, n.start) < Math.min(end, n.end));
-                if (isOverlap) { showToast("区域有重叠，请勿重复划线"); clearSelectionUI(); return; }
-            } else {
-                epubRendition.annotations.highlight(cfiRange, {}, (ev) => { 
-                    if(confirm("确认删除这条划线记录吗？")) { epubRendition.annotations.remove(cfiRange, "highlight"); window.removeNoteFromDBByCfi(cfiRange); }
-                });
-            }
+            if (type === 'txt') { const isOverlap = b.notes.some(n => n.type === 'highlight' && n.start !== undefined && Math.max(start, n.start) < Math.min(end, n.end)); if (isOverlap) { showToast("区域有重叠，请勿重复划线"); clearSelectionUI(); return; } } 
+            else { epubRendition.annotations.highlight(cfiRange, {}, (ev) => { if(confirm("确认删除这条划线记录吗？")) { epubRendition.annotations.remove(cfiRange, "highlight"); window.removeNoteFromDBByCfi(cfiRange); } }); }
             b.notes.unshift({ type: 'highlight', text: text, cfi: cfiRange, start, end, progressDetail: b.progressDetail, progress: b.progress, time: Date.now() });
             s.put(b).onsuccess = () => { showToast("🖍️ 划线已完美保存"); clearSelectionUI(); if (type === 'txt') renderTxtContent(b); };
+        };
+    }
+
+    function generateCardFromQuote(bookId, text) {
+        db.transaction(['books']).objectStore('books').get(bookId).onsuccess = (e) => {
+            const b = e.target.result; if(!b) return;
+            const canvas = document.createElement('canvas'); canvas.width = 1080; canvas.height = 1440; const ctx = canvas.getContext('2d');
+            
+            let rgb = b.dominantColor || '0, 132, 255'; let grad = ctx.createLinearGradient(0, 0, 1080, 1440);
+            grad.addColorStop(0, `rgba(${rgb}, 0.05)`); grad.addColorStop(1, `rgba(${rgb}, 0.25)`);
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 1080, 1440); ctx.fillStyle = grad; ctx.fillRect(0, 0, 1080, 1440);
+            
+            ctx.shadowColor = 'rgba(0,0,0,0.1)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 20;
+            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.roundRect(80, 200, 920, 1040, 40); ctx.fill(); ctx.shadowColor = 'transparent';
+
+            ctx.fillStyle = '#1f1f1f'; ctx.font = 'bold 52px sans-serif'; ctx.textBaseline = 'top';
+            let words = text.split(''); let line = ''; let y = 320; const x = 160; const maxWidth = 760; const lineHeight = 80;
+            for(let n = 0; n < words.length; n++) {
+                let testLine = line + words[n]; let metrics = ctx.measureText(testLine); let testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) { ctx.fillText(line, x, y); line = words[n]; y += lineHeight; } else { line = testLine; }
+            }
+            ctx.fillText(line, x, y);
+
+            ctx.fillStyle = `rgba(${rgb}, 1)`; ctx.font = 'bold 36px sans-serif'; ctx.fillText(`—— 《${b.title}》`, x, y + 160);
+            ctx.fillStyle = '#7a7a7a'; ctx.font = '28px sans-serif'; ctx.fillText(b.author || 'Readlite', x + 60, y + 220);
+
+            const link = document.createElement('a'); link.download = `Readlite_Card_${Date.now()}.png`; link.href = canvas.toDataURL(); link.click();
+            showToast("精美卡片已保存至相册！");
         };
     }
 
@@ -1079,25 +1225,24 @@
 
     function escapeHtml(t) { return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
-    // ================= Reader 核心 =================
     function renderTxtContent(b) {
-        const v = document.getElementById('txt-viewer'); let content = b.content;
-        let highlights = (b.notes || []).filter(n => n.type === 'highlight' && n.start !== undefined).sort((x, y) => x.start - y.start);
+        const v = document.getElementById('txt-viewer'); let content = b.content; let highlights = (b.notes || []).filter(n => n.type === 'highlight' && n.start !== undefined).sort((x, y) => x.start - y.start);
         let res = ''; let lastEnd = 0;
-        for (let h of highlights) {
-            if (h.start < lastEnd) continue; 
-            res += escapeHtml(content.substring(lastEnd, h.start)); res += `<mark class="txt-highlight" data-cfi="${h.cfi}">` + escapeHtml(content.substring(h.start, h.end)) + `</mark>`; lastEnd = h.end;
-        }
+        for (let h of highlights) { if (h.start < lastEnd) continue; res += escapeHtml(content.substring(lastEnd, h.start)); res += `<mark class="txt-highlight" data-cfi="${h.cfi}">` + escapeHtml(content.substring(h.start, h.end)) + `</mark>`; lastEnd = h.end; }
         res += escapeHtml(content.substring(lastEnd)); v.innerHTML = res;
     }
 
     function showTxt(b) {
         document.getElementById('epub-viewer').style.display = 'none'; document.getElementById('pdf-viewer').style.display = 'none';
         const v = document.getElementById('txt-viewer'), w = document.getElementById('viewport-wrapper');
-        w.style.padding = '0'; v.style.padding = '32px 20px'; v.style.display = 'block'; 
+        w.style.padding = '0'; v.style.display = 'block'; 
         renderTxtContent(b); setTimeout(() => { w.scrollTop = b.progressDetail || 0; updateProg(calcTxtProg()); }, 50);
         w.onscroll = () => { const p = calcTxtProg(); updateProg(p); saveProg(w.scrollTop, p); };
+        
+        const badge = document.getElementById('time-estimate-badge');
+        badge.style.display = auroraPrefs.timeEst ? 'block' : 'none';
     }
+    
     function calcTxtProg() { const w = document.getElementById('viewport-wrapper'), t = w.scrollHeight - w.clientHeight; return t <= 0 ? 0 : w.scrollTop / t; }
     
     function showPdf(b) {
@@ -1110,16 +1255,49 @@
 
     function showEpub(b) {
         document.getElementById('txt-viewer').style.display = 'none'; document.getElementById('pdf-viewer').style.display = 'none';
-        const v = document.getElementById('epub-viewer'), w = document.getElementById('viewport-wrapper');
-        w.style.padding = '0'; v.style.padding = '0 20px'; v.style.display = 'block'; v.innerHTML = '';
+        const v = document.getElementById('epub-viewer'); v.style.display = 'block'; v.innerHTML = '';
         
+        const useDouble = auroraPrefs.doublePage; 
         epubBookInstance = ePub(b.content); 
-        const isWideScreen = window.innerWidth > 800; const useDouble = auroraPrefs.doublePage && isWideScreen;
-        epubRendition = epubBookInstance.renderTo("epub-viewer", { width: "100%", height: "100%", flow: useDouble ? "paginated" : "scrolled", spread: useDouble ? "auto" : "none", manager: "continuous" });
+        epubRendition = epubBookInstance.renderTo("epub-viewer", { width: "100%", height: "100%", flow: useDouble ? "paginated" : "scrolled", minSpreadWidth: 800, manager: "continuous" });
         
         epubRendition.hooks.content.register(function(contents) {
             let s = contents.document.createElement('style'); s.id = 'rl-style'; s.innerHTML = getEpubCSS(); contents.document.head.appendChild(s);
-            contents.document.addEventListener('click', () => { const sel = contents.window.getSelection(); if (!sel || sel.isCollapsed) clearSelectionUI(); });
+            
+            contents.document.addEventListener('click', (e) => { 
+                const sel = contents.window.getSelection(); if (!sel || sel.isCollapsed) clearSelectionUI(); 
+                const now = Date.now();
+                if (now - lastTouchTime < 300) { document.getElementById('reader-container').classList.toggle('fullscreen'); clearTimeout(hideTimer); hideTimer = null; }
+                lastTouchTime = now;
+            });
+            
+            let startY = 0;
+            contents.document.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, {passive: true});
+            contents.document.addEventListener('touchmove', (e) => {
+                const currentY = e.touches[0].clientY;
+                const container = document.getElementById('reader-container'); const footer = document.getElementById('reader-footer');
+                footer.classList.add('scrolling'); clearTimeout(readerScrollTimeout); readerScrollTimeout = setTimeout(() => { footer.classList.remove('scrolling'); }, 200);
+                
+                if (startY - currentY > 10) { 
+                    if (!container.classList.contains('fullscreen') && !hideTimer) { hideTimer = setTimeout(() => { container.classList.add('fullscreen'); hideTimer = null; }, 3000); }
+                } else if (currentY - startY > 10) { container.classList.remove('fullscreen'); clearTimeout(hideTimer); hideTimer = null; }
+            }, {passive: true});
+
+            contents.window.addEventListener('wheel', (e) => {
+                const container = document.getElementById('reader-container'); const footer = document.getElementById('reader-footer');
+                footer.classList.add('scrolling'); clearTimeout(readerScrollTimeout); readerScrollTimeout = setTimeout(() => { footer.classList.remove('scrolling'); }, 200);
+                
+                if (useDouble) {
+                    e.preventDefault();
+                    if(epubWheelTimeout) return; epubWheelTimeout = setTimeout(() => { epubWheelTimeout = null; }, 150); 
+                    if (e.deltaY > 0) epubRendition.next(); else epubRendition.prev();
+                    if (e.deltaY > 0) { if (!container.classList.contains('fullscreen') && !hideTimer) { hideTimer = setTimeout(() => { container.classList.add('fullscreen'); hideTimer = null; }, 3000); }
+                    } else if (e.deltaY < 0) { container.classList.remove('fullscreen'); clearTimeout(hideTimer); hideTimer = null; }
+                } else {
+                    if (e.deltaY > 0) { if (!container.classList.contains('fullscreen') && !hideTimer) { hideTimer = setTimeout(() => { container.classList.add('fullscreen'); hideTimer = null; }, 3000); }
+                    } else if (e.deltaY < 0) { container.classList.remove('fullscreen'); clearTimeout(hideTimer); hideTimer = null; }
+                }
+            }, {passive: false});
         });
 
         applyTypographyToReader(); epubRendition.display(b.progressDetail || undefined);
@@ -1127,15 +1305,7 @@
         epubRendition.on("rendered", () => {
             db.transaction(['books'], 'readonly').objectStore('books').get(activeBookId).onsuccess = (e) => {
                 const bk = e.target.result;
-                if(bk && bk.notes) {
-                    bk.notes.forEach(note => {
-                        if (note.type === 'highlight' && note.cfi && !note.cfi.startsWith('txt-')) {
-                            epubRendition.annotations.highlight(note.cfi, {}, (event) => {
-                                if(confirm("确认删除这条划线记录吗？")) { epubRendition.annotations.remove(note.cfi, "highlight"); window.removeNoteFromDBByCfi(note.cfi); }
-                            });
-                        }
-                    });
-                }
+                if(bk && bk.notes) { bk.notes.forEach(note => { if (note.type === 'highlight' && note.cfi && !note.cfi.startsWith('txt-')) { epubRendition.annotations.highlight(note.cfi, {}, (event) => { if(confirm("确认删除这条划线记录吗？")) { epubRendition.annotations.remove(note.cfi, "highlight"); window.removeNoteFromDBByCfi(note.cfi); } }); } }); }
             };
         });
         
@@ -1145,128 +1315,81 @@
         epubRendition.on('relocated', (loc) => { 
             let p = epubBookInstance.locations.total > 0 ? epubBookInstance.locations.percentageFromCfi(loc.start.cfi) : (loc.start.index / (epubBookInstance.spine.length || 1));
             updateProg(p || 0); saveProg(loc.start.cfi, p || 0); 
-            if(auroraPrefs.timeEst) {
-                if (loc.end && loc.end.displayed) { const pagesLeft = loc.end.displayed.total - loc.end.displayed.page; badge.innerText = `${t('badge_left')} ${Math.max(1, Math.ceil(pagesLeft * 1.5))} ${t('time_min')}`; } 
-                else badge.innerText = t('badge_calc');
-            }
+            if(auroraPrefs.timeEst) { if (loc.end && loc.end.displayed) { const pagesLeft = loc.end.displayed.total - loc.end.displayed.page; badge.innerText = `⏳ 剩余约 ${Math.max(1, Math.ceil(pagesLeft * 1.5))} 分钟`; } else badge.innerText = `⏳ 计算中...`; }
         });
 
-        epubRendition.on("selected", (cfiRange, contents) => {
-            const text = contents.window.getSelection().toString().trim();
-            if (text) { currentSelectionInfo = { type: 'epub', cfiRange, text, contents }; document.getElementById('selection-text-preview').innerText = text; document.getElementById('selection-toolbar').classList.add('active'); }
-        });
+        epubRendition.on("selected", (cfiRange, contents) => { const text = contents.window.getSelection().toString().trim(); if (text) { currentSelectionInfo = { type: 'epub', cfiRange, text, contents }; document.getElementById('selection-text-preview').innerText = text; document.getElementById('selection-toolbar').classList.add('active'); } });
     }
 
-    function updateProg(v) { document.getElementById('reader-progress-label').innerText = `${(Math.min(100, Math.max(0, v*100))).toFixed(1)}%`; }
+    function updateProg(v) { 
+        document.getElementById('reader-progress-label').innerText = `${(Math.min(100, Math.max(0, v*100))).toFixed(1)}%`; 
+        document.getElementById('reader-footer').style.setProperty('--read-progress', `${v * 100}%`); 
+        
+        if (auroraPrefs.timeEst && currentBookContext.type === 'txt') {
+            const badge = document.getElementById('time-estimate-badge');
+            let remain = Math.ceil(currentBookContext.totalMins * (1 - v));
+            badge.innerText = `⏳ 剩余约 ${remain} 分钟`;
+        }
+    }
+    
     function saveProg(d, p) { if(!activeBookId) return; const s = db.transaction(['books'], 'readwrite').objectStore('books'); s.get(activeBookId).onsuccess = (e) => { const b = e.target.result; if(b){ b.progressDetail = d; b.progress = p; s.put(b); } }; }
     
     function closeReader() { 
-        document.getElementById('reader-container').classList.remove('active'); document.getElementById('viewport-wrapper').onscroll = null; document.getElementById('time-estimate-badge').style.display = 'none';
-        clearSelectionUI();
+        document.getElementById('reader-container').classList.remove('active', 'fullscreen'); document.getElementById('viewport-wrapper').onscroll = null; document.getElementById('time-estimate-badge').style.display = 'none'; clearSelectionUI();
         if(epubRendition) { epubRendition.destroy(); epubRendition = null; epubBookInstance = null; } 
-        activeBookId = null; 
+        activeBookId = null; clearTimeout(hideTimer); hideTimer = null; 
         if(currentTab === 'quotes') { closeBookDetail(); } else if(currentDetailBookId) { openBookDetail(currentDetailBookId); } 
     }
 
-    // ================= 军事级加密 Web Crypto API =================
-    async function deriveKey(password) {
-        const enc = new TextEncoder();
-        const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(password), {name: "PBKDF2"}, false, ["deriveKey"]);
-        return await crypto.subtle.deriveKey({name: "PBKDF2", salt: enc.encode("readlite_v040_salt"), iterations: 100000, hash: "SHA-256"}, keyMaterial, {name: "AES-GCM", length: 256}, false, ["encrypt", "decrypt"]);
-    }
-    
-    async function encryptDataRaw(text, password) {
-        const key = await deriveKey(password); const iv = crypto.getRandomValues(new Uint8Array(12)); const enc = new TextEncoder();
-        const cipher = await crypto.subtle.encrypt({name: "AES-GCM", iv: iv}, key, enc.encode(text));
-        const combined = new Uint8Array(12 + cipher.byteLength); combined.set(iv); combined.set(new Uint8Array(cipher), 12);
-        return combined; 
-    }
-    async function decryptDataRaw(buffer, password) {
-        const combined = new Uint8Array(buffer); const iv = combined.slice(0, 12); const data = combined.slice(12);
-        const key = await deriveKey(password); const plain = await crypto.subtle.decrypt({name: "AES-GCM", iv: iv}, key, data);
-        return new TextDecoder().decode(plain);
-    }
+    async function deriveKey(password) { const enc = new TextEncoder(); const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(password), {name: "PBKDF2"}, false, ["deriveKey"]); return await crypto.subtle.deriveKey({name: "PBKDF2", salt: enc.encode("readlite_v040_salt"), iterations: 100000, hash: "SHA-256"}, keyMaterial, {name: "AES-GCM", length: 256}, false, ["encrypt", "decrypt"]); }
+    async function encryptDataRaw(text, password) { const key = await deriveKey(password); const iv = crypto.getRandomValues(new Uint8Array(12)); const enc = new TextEncoder(); const cipher = await crypto.subtle.encrypt({name: "AES-GCM", iv: iv}, key, enc.encode(text)); const combined = new Uint8Array(12 + cipher.byteLength); combined.set(iv); combined.set(new Uint8Array(cipher), 12); return combined; }
+    async function decryptDataRaw(buffer, password) { const combined = new Uint8Array(buffer); const iv = combined.slice(0, 12); const data = combined.slice(12); const key = await deriveKey(password); const plain = await crypto.subtle.decrypt({name: "AES-GCM", iv: iv}, key, data); return new TextDecoder().decode(plain); }
 
     async function exportLocalBackup() {
-        const pwd = prompt("为增强数据安全，请为本次备份设置解密密码 (留空则不加密)：");
-        if(pwd === null) return;
-        showToast("正在打包全量数据，请稍候...");
+        const pwd = prompt("为增强数据安全，请为本次备份设置解密密码 (留空则不加密)："); if(pwd === null) return; showToast("正在打包全量数据，请稍候...");
         db.transaction(['books']).objectStore('books').getAll().onsuccess = async (e) => {
             let books = e.target.result;
-            for (let b of books) {
-                if (b.content instanceof ArrayBuffer) { b.isBase64 = true; b.content = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.readAsDataURL(new Blob([b.content])); }); }
-            }
+            for (let b of books) { if (b.content instanceof ArrayBuffer) { b.isBase64 = true; b.content = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.readAsDataURL(new Blob([b.content])); }); } }
             let dataStr = JSON.stringify(books); let fileName = `Readlite_Backup_${new Date().toISOString().slice(0,10)}`; let blob;
-            
-            if (pwd) { const encryptedBytes = await encryptDataRaw(dataStr, pwd); fileName += '.readlite'; blob = new Blob([encryptedBytes], {type: "application/octet-stream"}); } 
-            else { fileName += '.json'; blob = new Blob([dataStr], {type: "application/json"}); }
-            
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fileName; a.click(); 
-            showToast("全量数据导出成功！");
+            if (pwd) { const encryptedBytes = await encryptDataRaw(dataStr, pwd); fileName += '.readlite'; blob = new Blob([encryptedBytes], {type: "application/octet-stream"}); } else { fileName += '.json'; blob = new Blob([dataStr], {type: "application/json"}); }
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fileName; a.click(); showToast("全量数据导出成功！");
         };
     }
 
     function importLocalBackup(event) {
-        const file = event.target.files[0]; if (!file) return;
-        const isEncrypted = file.name.endsWith('.readlite');
-        let pwd = ''; if (isEncrypted) { pwd = prompt("该备份文件已被加密，请输入解密密码："); if(!pwd) return; }
-        showToast("正在解析并重建数据仓库...");
+        const file = event.target.files[0]; if (!file) return; const isEncrypted = file.name.endsWith('.readlite'); let pwd = ''; if (isEncrypted) { pwd = prompt("该备份文件已被加密，请输入解密密码："); if(!pwd) return; } showToast("正在解析并重建数据仓库...");
         const reader = new FileReader();
         reader.onload = async (e) => { 
             try {
-                let dataStr; 
-                if(isEncrypted) dataStr = await decryptDataRaw(e.target.result, pwd); else dataStr = new TextDecoder().decode(e.target.result);
-                let books = JSON.parse(dataStr);
-                const tx = db.transaction(['books'], 'readwrite'); const store = tx.objectStore('books');
-                for (let b of books) {
-                    if (b.isBase64 && typeof b.content === 'string') {
-                        let bin = window.atob(b.content); let len = bin.length; let bytes = new Uint8Array(len);
-                        for (let i = 0; i < len; i++) { bytes[i] = bin.charCodeAt(i); }
-                        b.content = bytes.buffer; delete b.isBase64; 
-                    }
-                    store.put(b); 
-                }
+                let dataStr; if(isEncrypted) dataStr = await decryptDataRaw(e.target.result, pwd); else dataStr = new TextDecoder().decode(e.target.result);
+                let books = JSON.parse(dataStr); const tx = db.transaction(['books'], 'readwrite'); const store = tx.objectStore('books');
+                for (let b of books) { if (b.isBase64 && typeof b.content === 'string') { let bin = window.atob(b.content); let len = bin.length; let bytes = new Uint8Array(len); for (let i = 0; i < len; i++) { bytes[i] = bin.charCodeAt(i); } b.content = bytes.buffer; delete b.isBase64; } store.put(b); }
                 tx.oncomplete = () => { loadBookshelf(); showToast("本地数据恢复成功！"); closeOverlays(); }; 
             } catch (err) { console.error(err); showToast("解析失败：密码错误或文件已损坏"); }
         };
         reader.readAsArrayBuffer(file); event.target.value = '';
     }
 
-    // ================= 局域网暗号 P2P 同步 (基于 PeerJS) =================
-    function closeSyncModal() {
-        closeOverlays(); if(peer) { peer.destroy(); peer = null; }
-        setTimeout(() => { document.getElementById('sync-ui-main').style.display = 'block'; document.getElementById('sync-ui-sender').style.display = 'none'; document.getElementById('sync-ui-receiver').style.display = 'none'; }, 300);
-    }
-
+    function closeSyncModal() { closeOverlays(); if(peer) { peer.destroy(); peer = null; } setTimeout(() => { document.getElementById('sync-ui-main').style.display = 'block'; document.getElementById('sync-ui-sender').style.display = 'none'; document.getElementById('sync-ui-receiver').style.display = 'none'; }, 300); }
     function startSyncSender() {
-        document.getElementById('sync-ui-main').style.display = 'none'; document.getElementById('sync-ui-sender').style.display = 'block';
-        const code = Math.floor(100000 + Math.random() * 900000).toString(); document.getElementById('sync-code-val').innerText = code;
-        peer = new Peer('readlite-sync-' + code);
-        
+        document.getElementById('sync-ui-main').style.display = 'none'; document.getElementById('sync-ui-sender').style.display = 'block'; const code = Math.floor(100000 + Math.random() * 900000).toString(); document.getElementById('sync-code-val').innerText = code; peer = new Peer('readlite-sync-' + code);
         peer.on('open', (id) => { document.getElementById('sync-status-sender').innerText = "服务已启动，等待接收端..."; });
         peer.on('connection', (conn) => {
             document.getElementById('sync-status-sender').innerText = "接收端已连接！正在加密并发送数据...";
             conn.on('data', (msg) => {
                 if (msg === 'READY') {
                     db.transaction(['books']).objectStore('books').getAll().onsuccess = async (e) => {
-                        let books = e.target.result;
-                        for (let b of books) { if (b.content instanceof ArrayBuffer) { b.isBase64 = true; b.content = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.readAsDataURL(new Blob([b.content])); }); } }
-                        const encryptedBytes = await encryptDataRaw(JSON.stringify(books), code);
-                        conn.send({ type: 'DATA', payload: encryptedBytes });
-                        document.getElementById('sync-status-sender').innerText = "数据发送成功！";
+                        let books = e.target.result; for (let b of books) { if (b.content instanceof ArrayBuffer) { b.isBase64 = true; b.content = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.readAsDataURL(new Blob([b.content])); }); } }
+                        const encryptedBytes = await encryptDataRaw(JSON.stringify(books), code); conn.send({ type: 'DATA', payload: encryptedBytes }); document.getElementById('sync-status-sender').innerText = "数据发送成功！";
                     };
                 }
             });
         });
         peer.on('error', (err) => document.getElementById('sync-status-sender').innerText = "连接出错: " + err.type);
     }
-
     function startSyncReceiver() { document.getElementById('sync-ui-main').style.display = 'none'; document.getElementById('sync-ui-receiver').style.display = 'block'; }
-
     function connectToSender() {
-        const code = document.getElementById('sync-input-val').value.trim(); if(code.length !== 6) { showToast("请输入 6 位有效暗号"); return; }
-        document.getElementById('sync-status-receiver').innerText = "正在寻找发送端...";
-        peer = new Peer();
+        const code = document.getElementById('sync-input-val').value.trim(); if(code.length !== 6) { showToast("请输入 6 位有效暗号"); return; } document.getElementById('sync-status-receiver').innerText = "正在寻找发送端..."; peer = new Peer();
         peer.on('open', () => {
             syncConn = peer.connect('readlite-sync-' + code);
             syncConn.on('open', () => { document.getElementById('sync-status-receiver').innerText = "已连接！正在接收数据..."; syncConn.send('READY'); });
@@ -1274,16 +1397,8 @@
                 if(data.type === 'DATA') {
                     document.getElementById('sync-status-receiver').innerText = "数据已接收，正在解密重建仓库...";
                     try {
-                        let rawJson = await decryptDataRaw(data.payload, code); let books = JSON.parse(rawJson);
-                        const tx = db.transaction(['books'], 'readwrite'); const store = tx.objectStore('books');
-                        for (let b of books) {
-                            if (b.isBase64 && typeof b.content === 'string') {
-                                let bin = window.atob(b.content); let len = bin.length; let bytes = new Uint8Array(len);
-                                for (let i = 0; i < len; i++) { bytes[i] = bin.charCodeAt(i); }
-                                b.content = bytes.buffer; delete b.isBase64; 
-                            }
-                            store.put(b); 
-                        }
+                        let rawJson = await decryptDataRaw(data.payload, code); let books = JSON.parse(rawJson); const tx = db.transaction(['books'], 'readwrite'); const store = tx.objectStore('books');
+                        for (let b of books) { if (b.isBase64 && typeof b.content === 'string') { let bin = window.atob(b.content); let len = bin.length; let bytes = new Uint8Array(len); for (let i = 0; i < len; i++) { bytes[i] = bin.charCodeAt(i); } b.content = bytes.buffer; delete b.isBase64; } store.put(b); }
                         tx.oncomplete = () => { loadBookshelf(); showToast("同步完成！"); closeSyncModal(); };
                     } catch(e) { document.getElementById('sync-status-receiver').innerText = "解密或写入失败"; }
                 }
